@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    #vis.vega-embed {
+      width: 100%;
+      display: flex;
+    }
+
+    #vis.vega-embed details,
+    #vis.vega-embed details summary {
+      position: relative;
+    }
+  </style>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5.20.1"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+<body>
+  <div id="vis"></div>
+  <script>
+    (function(vegaEmbed) {
+      var spec = {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}, "axis": {"labelFontSize": 12, "titleFontSize": 14}, "title": {"anchor": "start", "fontSize": 18}}, "data": {"name": "data-b9317d469d2dc5d428bd951b24687946"}, "mark": {"type": "bar"}, "encoding": {"color": {"condition": {"param": "param_2", "empty": false, "field": "Vehicle Count", "scale": {"scheme": "viridis"}, "type": "quantitative"}, "value": "lightgray"}, "tooltip": [{"field": "Make", "title": "Manufacturer", "type": "nominal"}, {"field": "Vehicle Count", "format": ",", "title": "Count", "type": "quantitative"}], "x": {"field": "Vehicle Count", "title": "Number of Vehicles", "type": "quantitative"}, "y": {"field": "Make", "sort": "-x", "title": "Manufacturer", "type": "nominal"}}, "height": 400, "params": [{"name": "param_2", "select": {"type": "point", "fields": ["Make"], "on": "mouseover"}}], "title": "Top 10 Manufacturers by Vehicle Count", "width": 600, "$schema": "https://vega.github.io/schema/vega-lite/v5.20.1.json", "datasets": {"data-b9317d469d2dc5d428bd951b24687946": [{"Make": "TESLA", "Vehicle Count": 104100}, {"Make": "CHEVROLET", "Vehicle Count": 17771}, {"Make": "NISSAN", "Vehicle Count": 15772}, {"Make": "FORD", "Vehicle Count": 13158}, {"Make": "KIA", "Vehicle Count": 12019}, {"Make": "BMW", "Vehicle Count": 10141}, {"Make": "TOYOTA", "Vehicle Count": 9999}, {"Make": "HYUNDAI", "Vehicle Count": 7906}, {"Make": "RIVIAN", "Vehicle Count": 7332}, {"Make": "JEEP", "Vehicle Count": 6697}]}};
+      var embedOpt = {"mode": "vega-lite"};
+
+      function showError(el, error){
+          el.innerHTML = ('<div style="color:red;">'
+                          + '<p>JavaScript Error: ' + error.message + '</p>'
+                          + "<p>This usually means there's a typo in your chart specification. "
+                          + "See the javascript console for the full traceback.</p>"
+                          + '</div>');
+          throw error;
+      }
+      const el = document.getElementById('vis');
+      vegaEmbed("#vis", spec, embedOpt)
+        .catch(error => showError(el, error));
+    })(vegaEmbed);
+
+  </script>
+</body>
+</html>
