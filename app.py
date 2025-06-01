@@ -122,6 +122,42 @@ st.markdown("""
         padding: 1rem;
         border-top: 1px solid #eee;
     }
+
+    .modern-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.3rem 0.8rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .modern-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .filter-counter {
+        background: #4CAF50;
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+
+    .stMultiSelect > div > div {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e1e5e9;
+    }
+
+    .stMultiSelect > div > div:focus-within {
+        border-color: #667eea;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -225,8 +261,12 @@ def create_sidebar_filters():
 
     selected = st.sidebar.selectbox("Choose Page:", list(pages.keys()),
                                     index=list(pages.keys()).index(st.session_state.current_page),
-                                    key="navigation")
-    st.session_state.current_page = selected
+                                    key="navigation_selectbox")
+
+    # Only update if selection actually changed
+    if selected != st.session_state.current_page:
+        st.session_state.current_page = selected
+        st.rerun()
 
     # Real-Time Analytics at top
     st.sidebar.markdown("### Real-Time Analytics")
@@ -279,36 +319,45 @@ def create_sidebar_filters():
     # Initialize variables
     selected_counties = []
 
-    # Geographic Filters
+    # Geographic Filters - Modern Interface
     if 'County' in st.session_state.df.columns:
         st.sidebar.markdown("#### Geographic Filters")
         counties = sorted(st.session_state.df['County'].dropna().unique().tolist())
 
-        # Ensure selected_counties are valid (intersection with current counties)
+        # Ensure selected_counties are valid
         if not st.session_state.selected_counties:
             st.session_state.selected_counties = counties
         valid_selected_counties = [c for c in st.session_state.selected_counties if c in counties]
-        if not valid_selected_counties:  # If no valid counties, default to all
+        if not valid_selected_counties:
             valid_selected_counties = counties
         st.session_state.selected_counties = valid_selected_counties
 
-        col1, col2 = st.sidebar.columns(2)
+        # Modern filter interface
+        st.sidebar.markdown("**Counties** (Select one or more)")
+        col1, col2 = st.sidebar.columns([1, 1])
         with col1:
-            if st.button("All Counties", key="select_all_counties"):
+            if st.button("All", key="select_all_counties", help="Select all counties"):
                 st.session_state.selected_counties = counties
+                st.rerun()
         with col2:
-            if st.button("Clear Counties", key="clear_counties"):
+            if st.button("Clear", key="clear_counties", help="Clear all selections"):
                 st.session_state.selected_counties = []
+                st.rerun()
 
+        # Modern multiselect with better UX
         selected_counties = st.sidebar.multiselect(
-            "Select Counties:",
+            "",
             counties,
             default=st.session_state.selected_counties,
-            key="counties_multiselect"
+            key="counties_multiselect",
+            help=f"Select from {len(counties)} available counties"
         )
-        st.session_state.selected_counties = selected_counties
 
-    # Makes Selection
+        # Update session state only if changed
+        if selected_counties != st.session_state.selected_counties:
+            st.session_state.selected_counties = selected_counties
+
+    # Makes Selection - Modern Interface
     st.sidebar.markdown("#### Vehicle Makes")
     makes = sorted(st.session_state.df['Make'].unique().tolist())
 
@@ -316,27 +365,35 @@ def create_sidebar_filters():
     if not st.session_state.selected_makes:
         st.session_state.selected_makes = makes
     valid_selected_makes = [m for m in st.session_state.selected_makes if m in makes]
-    if not valid_selected_makes:  # If no valid makes, default to all
+    if not valid_selected_makes:
         valid_selected_makes = makes
     st.session_state.selected_makes = valid_selected_makes
 
-    col1, col2 = st.sidebar.columns(2)
+    # Modern filter interface
+    st.sidebar.markdown(f"**Makes** ({len(st.session_state.selected_makes)}/{len(makes)} selected)")
+    col1, col2 = st.sidebar.columns([1, 1])
     with col1:
-        if st.button("All Makes", key="select_all_makes"):
+        if st.button("All", key="select_all_makes", help="Select all makes"):
             st.session_state.selected_makes = makes
+            st.rerun()
     with col2:
-        if st.button("Clear Makes", key="clear_makes"):
+        if st.button("Clear", key="clear_makes", help="Clear all selections"):
             st.session_state.selected_makes = []
+            st.rerun()
 
     selected_makes = st.sidebar.multiselect(
-        "Choose Makes:",
+        "",
         makes,
         default=st.session_state.selected_makes,
-        key="makes_multiselect"
+        key="makes_multiselect",
+        help=f"Select from {len(makes)} available makes"
     )
-    st.session_state.selected_makes = selected_makes
 
-    # Vehicle Types Selection
+    # Update session state only if changed
+    if selected_makes != st.session_state.selected_makes:
+        st.session_state.selected_makes = selected_makes
+
+    # Vehicle Types Selection - Modern Interface
     st.sidebar.markdown("#### Vehicle Types")
     vehicle_types = sorted(st.session_state.df['Electric Vehicle Type'].unique().tolist())
 
@@ -344,25 +401,33 @@ def create_sidebar_filters():
     if not st.session_state.selected_types:
         st.session_state.selected_types = vehicle_types
     valid_selected_types = [t for t in st.session_state.selected_types if t in vehicle_types]
-    if not valid_selected_types:  # If no valid types, default to all
+    if not valid_selected_types:
         valid_selected_types = vehicle_types
     st.session_state.selected_types = valid_selected_types
 
-    col1, col2 = st.sidebar.columns(2)
+    # Modern filter interface
+    st.sidebar.markdown(f"**Types** ({len(st.session_state.selected_types)}/{len(vehicle_types)} selected)")
+    col1, col2 = st.sidebar.columns([1, 1])
     with col1:
-        if st.button("All Types", key="select_all_types"):
+        if st.button("All", key="select_all_types", help="Select all types"):
             st.session_state.selected_types = vehicle_types
+            st.rerun()
     with col2:
-        if st.button("Clear Types", key="clear_types"):
+        if st.button("Clear", key="clear_types", help="Clear all selections"):
             st.session_state.selected_types = []
+            st.rerun()
 
     selected_types = st.sidebar.multiselect(
-        "Choose Types:",
+        "",
         vehicle_types,
         default=st.session_state.selected_types,
-        key="types_multiselect"
+        key="types_multiselect",
+        help=f"Select from {len(vehicle_types)} available types"
     )
-    st.session_state.selected_types = selected_types
+
+    # Update session state only if changed
+    if selected_types != st.session_state.selected_types:
+        st.session_state.selected_types = selected_types
 
     # CAFV Eligibility Filter
     if 'Clean Alternative Fuel Vehicle (CAFV) Eligibility' in st.session_state.df.columns:
@@ -444,30 +509,6 @@ def create_sidebar_filters():
                 st.metric("Filtered Counties", f"{filtered_unique_counties}")
 
     return filtered_df, display_df
-
-
-# Page Navigation
-def create_navigation():
-    """Create enhanced page navigation"""
-    pages = {
-        "Home": "home",
-        "Executive Dashboard": "overview",
-        "Price Analytics": "price",
-        "Geographic Insights": "geographic",
-        "Performance Analysis": "performance",
-        "Market Leaders": "leaders",
-        "Distribution Analysis": "distribution",
-        "Market Share": "pie",
-        "Box Analysis": "boxplot",
-        "Heatmap Analysis": "heatmap",
-        "Trends Analysis": "trends"
-    }
-
-    selected = st.sidebar.selectbox("Navigate to Section", list(pages.keys()),
-                                    index=list(pages.keys()).index(st.session_state.current_page),
-                                    key="navigation")
-    st.session_state.current_page = selected
-    return selected
 
 
 # Color Schemes and Selections
@@ -667,6 +708,11 @@ def overview_page(filtered_df, display_df):
     """Executive dashboard with comprehensive KPIs"""
     st.markdown('<h1 class="main-header">Executive Dashboard</h1>', unsafe_allow_html=True)
 
+    # Return to Home button
+    if st.button("Return to Home", key="overview_home", help="Go back to home page"):
+        st.session_state.current_page = "Home"
+        st.rerun()
+
     if filtered_df.empty:
         st.warning("No data available with current filters. Please adjust your selection.")
         return
@@ -785,6 +831,11 @@ def price_page(filtered_df, display_df):
     """Advanced price analytics page"""
     st.markdown('<h1 class="main-header">Price Analytics Dashboard</h1>', unsafe_allow_html=True)
 
+    # Return to Home button
+    if st.button("Return to Home", key="price_home", help="Go back to home page"):
+        st.session_state.current_page = "Home"
+        st.rerun()
+
     if 'Base MSRP' not in filtered_df.columns:
         st.error("Price data not available in the dataset.")
         return
@@ -886,6 +937,11 @@ def geographic_page(filtered_df, display_df):
     """Geographic insights and analysis"""
     st.markdown('<h1 class="main-header">Geographic Market Insights</h1>', unsafe_allow_html=True)
 
+    # Return to Home button
+    if st.button("Return to Home", key="geo_home", help="Go back to home page"):
+        st.session_state.current_page = "Home"
+        st.rerun()
+
     if 'County' not in filtered_df.columns:
         st.error("Geographic data not available in the dataset.")
         return
@@ -958,6 +1014,11 @@ def geographic_page(filtered_df, display_df):
 def performance_page(filtered_df, display_df):
     """Performance and range analysis"""
     st.markdown('<h1 class="main-header">Performance Analytics</h1>', unsafe_allow_html=True)
+
+    # Return to Home button
+    if st.button("Return to Home", key="perf_home", help="Go back to home page"):
+        st.session_state.current_page = "Home"
+        st.rerun()
 
     if filtered_df.empty:
         st.warning("No data available with current filters.")
@@ -1034,6 +1095,11 @@ def distribution_page(filtered_df, display_df):
     """Distribution analysis page"""
     st.markdown('<h1 class="main-header">Distribution Analysis</h1>', unsafe_allow_html=True)
 
+    # Return to Home button
+    if st.button("Return to Home", key="dist_home", help="Go back to home page"):
+        st.session_state.current_page = "Home"
+        st.rerun()
+
     if display_df.empty:
         st.warning("No data available with current filters.")
         return
@@ -1081,6 +1147,11 @@ def pie_page(filtered_df, display_df):
     """Pie chart and market share analysis"""
     st.markdown('<h1 class="main-header">Market Share Analysis</h1>', unsafe_allow_html=True)
 
+    # Return to Home button
+    if st.button("Return to Home", key="pie_home", help="Go back to home page"):
+        st.session_state.current_page = "Home"
+        st.rerun()
+
     if filtered_df.empty:
         st.warning("No data available with current filters.")
         return
@@ -1123,6 +1194,11 @@ def pie_page(filtered_df, display_df):
 def boxplot_page(filtered_df, display_df):
     """Box plot analysis page"""
     st.markdown('<h1 class="main-header">Box Plot Analysis</h1>', unsafe_allow_html=True)
+
+    # Return to Home button
+    if st.button("Return to Home", key="box_home", help="Go back to home page"):
+        st.session_state.current_page = "Home"
+        st.rerun()
 
     if display_df.empty:
         st.warning("No data available with current filters.")
@@ -1182,6 +1258,11 @@ def boxplot_page(filtered_df, display_df):
 def heatmap_page(filtered_df, display_df):
     """Heatmap analysis page"""
     st.markdown('<h1 class="main-header">Heatmap Analysis</h1>', unsafe_allow_html=True)
+
+    # Return to Home button
+    if st.button("Return to Home", key="heatmap_home", help="Go back to home page"):
+        st.session_state.current_page = "Home"
+        st.rerun()
 
     if filtered_df.empty:
         st.warning("No data available with current filters.")
@@ -1246,6 +1327,11 @@ def heatmap_page(filtered_df, display_df):
 def trends_page(filtered_df, display_df):
     """Trends analysis page"""
     st.markdown('<h1 class="main-header">Trend Analysis</h1>', unsafe_allow_html=True)
+
+    # Return to Home button
+    if st.button("Return to Home", key="trends_home", help="Go back to home page"):
+        st.session_state.current_page = "Home"
+        st.rerun()
 
     if filtered_df.empty:
         st.warning("No data available with current filters.")
@@ -1372,8 +1458,192 @@ def calculate_range_improvement(df):
 
 # Stub pages for remaining navigation
 def leaders_page(filtered_df, display_df):
+    """Market Leaders Analysis with comprehensive rankings"""
     st.markdown('<h1 class="main-header">Market Leaders Analysis</h1>', unsafe_allow_html=True)
-    st.info("Market leaders analysis - detailed rankings and competitive insights")
+
+    # Return to Home button
+    if st.button("Return to Home", key="leaders_home", help="Go back to home page"):
+        st.session_state.current_page = "Home"
+        st.rerun()
+
+    if filtered_df.empty:
+        st.warning("No data available with current filters. Please adjust your selection.")
+        return
+
+    # Leadership metrics
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        top_make = filtered_df['Make'].value_counts().index[0]
+        top_make_count = filtered_df['Make'].value_counts().iloc[0]
+        market_share = (top_make_count / len(filtered_df)) * 100
+        st.metric("Market Leader", top_make, f"{market_share:.1f}% share")
+
+    with col2:
+        if 'Base MSRP' in filtered_df.columns:
+            luxury_leader = filtered_df[filtered_df['Base MSRP'] > 80000]['Make'].value_counts()
+            if not luxury_leader.empty:
+                st.metric("Luxury Leader", luxury_leader.index[0], f"{luxury_leader.iloc[0]} vehicles")
+
+    with col3:
+        range_leader_data = filtered_df.loc[filtered_df['Electric Range'].idxmax()]
+        st.metric("Range Leader", range_leader_data['Make'], f"{range_leader_data['Electric Range']:.0f} mi")
+
+    with col4:
+        fastest_growing = calculate_fastest_growing_make(filtered_df)
+        if fastest_growing:
+            st.metric("Fastest Growing", fastest_growing[0], f"+{fastest_growing[1]:.1f}%")
+
+    # Main analysis charts
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Market share ranking
+        market_ranking = filtered_df['Make'].value_counts().head(10).reset_index()
+        market_ranking.columns = ['Make', 'Count']
+        market_ranking['Market_Share'] = (market_ranking['Count'] / len(filtered_df) * 100).round(1)
+
+        ranking_chart = alt.Chart(market_ranking).mark_bar().encode(
+            x=alt.X('Market_Share:Q', title='Market Share (%)'),
+            y=alt.Y('Make:N', sort='-x', title='Vehicle Make'),
+            color=alt.Color('Market_Share:Q', scale=alt.Scale(scheme='blues'), legend=None),
+            tooltip=['Make', 'Count', alt.Tooltip('Market_Share:Q', format='.1f')]
+        ).properties(
+            width=350,
+            height=400,
+            title="Top 10 Market Share Leaders"
+        )
+        st.altair_chart(ranking_chart, use_container_width=True)
+
+    with col2:
+        # Performance vs Volume scatter
+        make_performance = filtered_df.groupby('Make').agg({
+            'Electric Range': 'mean',
+            'Make': 'count'
+        }).round(1)
+        make_performance.columns = ['Avg_Range', 'Volume']
+        make_performance = make_performance[make_performance['Volume'] >= 5].head(15).reset_index()
+
+        perf_volume_chart = alt.Chart(make_performance).mark_circle(size=100).encode(
+            x=alt.X('Volume:Q', title='Vehicle Volume'),
+            y=alt.Y('Avg_Range:Q', title='Average Range (miles)'),
+            size=alt.Size('Volume:Q', scale=alt.Scale(range=[100, 500]), legend=None),
+            color=alt.Color('Make:N', scale=alt.Scale(scheme='category20'), legend=None),
+            tooltip=['Make', 'Volume', alt.Tooltip('Avg_Range:Q', format='.1f')]
+        ).properties(
+            width=350,
+            height=400,
+            title="Performance vs Volume Matrix"
+        )
+        st.altair_chart(perf_volume_chart, use_container_width=True)
+
+    # Detailed rankings
+    st.markdown("### Detailed Market Rankings")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Volume leaders
+        st.markdown("#### Volume Leaders")
+        volume_leaders = filtered_df['Make'].value_counts().head(10).reset_index()
+        volume_leaders.columns = ['Make', 'Vehicles']
+        volume_leaders['Rank'] = range(1, len(volume_leaders) + 1)
+        volume_leaders['Market Share'] = (volume_leaders['Vehicles'] / len(filtered_df) * 100).round(1)
+
+        st.dataframe(
+            volume_leaders[['Rank', 'Make', 'Vehicles', 'Market Share']],
+            use_container_width=True,
+            hide_index=True
+        )
+
+    with col2:
+        # Performance leaders
+        st.markdown("#### Range Performance Leaders")
+        range_leaders = filtered_df.groupby('Make')['Electric Range'].agg(['mean', 'max', 'count']).round(1)
+        range_leaders.columns = ['Avg Range', 'Max Range', 'Count']
+        range_leaders = range_leaders[range_leaders['Count'] >= 3].sort_values('Avg Range', ascending=False).head(10)
+        range_leaders['Rank'] = range(1, len(range_leaders) + 1)
+        range_leaders = range_leaders.reset_index()
+
+        st.dataframe(
+            range_leaders[['Rank', 'Make', 'Avg Range', 'Max Range']],
+            use_container_width=True,
+            hide_index=True
+        )
+
+    # Price leadership analysis
+    if 'Base MSRP' in filtered_df.columns:
+        st.markdown("### Price Segment Analysis")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            # Premium segment leaders
+            premium_data = filtered_df[filtered_df['Base MSRP'] > 60000]
+            if not premium_data.empty:
+                premium_leaders = premium_data['Make'].value_counts().head(8).reset_index()
+                premium_leaders.columns = ['Make', 'Count']
+
+                premium_chart = alt.Chart(premium_leaders).mark_arc().encode(
+                    theta=alt.Theta('Count:Q'),
+                    color=alt.Color('Make:N', scale=alt.Scale(scheme='category20')),
+                    tooltip=['Make', 'Count']
+                ).properties(
+                    width=300,
+                    height=300,
+                    title="Premium Segment Leaders ($60K+)"
+                )
+                st.altair_chart(premium_chart, use_container_width=True)
+
+        with col2:
+            # Value segment leaders
+            value_data = filtered_df[filtered_df['Base MSRP'] <= 45000]
+            if not value_data.empty:
+                value_leaders = value_data['Make'].value_counts().head(8).reset_index()
+                value_leaders.columns = ['Make', 'Count']
+
+                value_chart = alt.Chart(value_leaders).mark_arc().encode(
+                    theta=alt.Theta('Count:Q'),
+                    color=alt.Color('Make:N', scale=alt.Scale(scheme='set3')),
+                    tooltip=['Make', 'Count']
+                ).properties(
+                    width=300,
+                    height=300,
+                    title="Value Segment Leaders ($45K-)"
+                )
+                st.altair_chart(value_chart, use_container_width=True)
+
+
+def calculate_fastest_growing_make(df):
+    """Calculate fastest growing make year over year"""
+    if 'Model Year' not in df.columns or len(df) < 50:
+        return None
+
+    try:
+        # Get last two years of data
+        years = sorted(df['Model Year'].unique())
+        if len(years) < 2:
+            return None
+
+        recent_year = years[-1]
+        previous_year = years[-2]
+
+        recent_counts = df[df['Model Year'] == recent_year]['Make'].value_counts()
+        previous_counts = df[df['Model Year'] == previous_year]['Make'].value_counts()
+
+        growth_rates = {}
+        for make in recent_counts.index:
+            if make in previous_counts.index and previous_counts[make] > 0:
+                growth = ((recent_counts[make] - previous_counts[make]) / previous_counts[make]) * 100
+                if recent_counts[make] >= 5:  # Minimum volume threshold
+                    growth_rates[make] = growth
+
+        if growth_rates:
+            fastest = max(growth_rates.items(), key=lambda x: x[1])
+            return fastest
+        return None
+    except:
+        return None
 
 
 # Main Application
