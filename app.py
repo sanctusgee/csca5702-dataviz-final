@@ -2,10 +2,10 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 
-# Set page configuration
-st.set_page_config(page_title="EV Population Dashboard", layout="wide")
+# Page Config
+st.set_page_config(page_title="EV Dashboard with Session State", layout="wide")
 
-# Load data
+# Load Data
 @st.cache_data
 def load_data():
     df = pd.read_csv("data/electric_vehicle_population.csv")
@@ -14,88 +14,129 @@ def load_data():
 
 df = load_data()
 
-# Sidebar filters
+# Initialize session state
+if 'selected_makes' not in st.session_state:
+    st.session_state.selected_makes = df['Make'].unique().tolist()
+
+if 'selected_types' not in st.session_state:
+    st.session_state.selected_types = df['Electric Vehicle Type'].unique().tolist()
+
+# Sidebar Filters
 st.sidebar.header("Filters")
-vehicle_types = df['Electric Vehicle Type'].unique().tolist()
-selected_types = st.sidebar.multiselect("Select Vehicle Types:", vehicle_types, default=vehicle_types)
 
+# Dynamic dropdowns based on bar chart selection
 makes = df['Make'].unique().tolist()
-selected_makes = st.sidebar.multiselect("Select Makes:", makes, default=makes)
+selected_makes = st.sidebar.multiselect(
+    "Select Makes:", makes,
+    default=st.session_state.selected_makes
+)
 
-# Filter data based on selections
-filtered_df = df[(df['Electric Vehicle Type'].isin(selected_types)) & (df['Make'].isin(selected_makes))]
+# Update session state
+st.session_state.selected_makes = selected_makes
 
-# Main dashboard
-st.title("Electric Vehicle Population Dashboard")
+vehicle_types = df['Electric Vehicle Type'].unique().tolist()
+selected_types = st.sidebar.multiselect(
+    "Select Vehicle Types:",
+    vehicle_types,
+    default=st.session_state.selected_types
+)
 
-# Histogram: Distribution of Electric Range
-st.subheader("Distribution of Electric Range")
-hist = alt.Chart(filtered_df).mark_bar().encode(
-    alt.X("Electric Range:Q", bin=alt.Bin(maxbins=30), title="Electric Range (miles)"),
-    y='count()',
-    tooltip=['count()']
-).properties(width=700, height=400)
-st.altair_chart(hist, use_container_width=True)
+st.session_state.selected_types = selected_types
 
-# Boxplot: Electric Range by Vehicle Type
-st.subheader("Electric Range by Vehicle Type")
-box = alt.Chart(filtered_df).mark_boxplot().encode(
+filtered_df = df[
+    (df['Make'].isin(selected_makes)) &
+    (df['Electric Vehicle Type'].isin(selected_types))
+]
+
+# Show filtered record count
+total_records = filtered_df.shape[0]
+st.sidebar.markdown(f"Filtered Records: {total_records:,}")
+
+# Toggle Sample Mode
+use_sample = st.sidebar.checkbox("Use Sample Mode (5,000 Points)", value=True)
+
+if use_sample and total_records > 5000:
+    display_df = filtered_df.sample(n=5000, random_state=42)
+    st.sidebar.markdown("Displaying a random sample of 5,000 records.")
+else:
+    display_df = filtered_df
+    st.sidebar.markdown(f"Displaying all {total_records:,} records.")
+
+st.title("Electric Vehicle Dashboard with Session State and Dynamic Dropdowns")
+
+# Selection Object for Linking
+vehicle_type_selection = alt.selection_point(fields=['Electric Vehicle Type'])
+
+# 1. Bar Chart for Vehicle Type Selection
+bar = alt.Chart(filtered_df).mark_bar().encode(
+    x=alt.X('Electric Vehicle Type:N', title="Vehicle Type"),
+    y=alt.Y('count()', title="Number of Vehicles"),
+    color=alt.condition(vehicle_type_selection, alt.Color('Electric Vehicle Type:N', legend=None), alt.value('lightgray')),
+    tooltip=['Electric Vehicle Type', 'count()']
+).add_params(
+    vehicle_type_selection
+).properties(width=700, height=400, title="Click a Vehicle Type to Filter Other Charts")
+
+st.altair_chart(bar, use_container_width=True)
+
+# 2. Update Vehicle Type Dropdown Based on Selection
+selected_points = vehicle_type_selection.resolve_selection(filtered_df)
+if selected_points:
+    selected_vehicle_types = list(set(point['Electric Vehicle Type'] for point in selected_points))
+    st.session_state.selected_types = selected_vehicle_types
+
+# 3. Scatter Plot with Sampling
+scatter = alt.Chart(display_df).mark_circle(size=60).encode(
+    x=alt.X('Model Year:O', title="Model Year"),
+    y=alt.Y('Electric Range:Q', title="Electric Range (miles)"),
+    color=alt.Color('Electric Vehicle Type:N'),
+    tooltip=['Make', 'Model Year', 'Electric Vehicle Type', 'Electric Range']
+).transform_filter(
+    vehicle_type_selection
+).interactive().properties(width=700, height=400, title="Electric Range vs. Model Year")
+
+st.altair_chart(scatter, use_container_width=True)
+
+# 4. Boxplot (Top 5 Vehicle Types)
+top_types = (
+    filtered_df['Electric Vehicle Type']
+    .value_counts()
+    .head(5)
+    .index
+    .tolist()
+)
+filtered_box_df = filtered_df[filtered_df['Electric Vehicle Type'].isin(top_types)]
+box = alt.Chart(filtered_box_df).mark_boxplot().encode(
     x=alt.X('Electric Vehicle Type:N', title="Vehicle Type"),
     y=alt.Y('Electric Range:Q', title="Electric Range (miles)"),
     color='Electric Vehicle Type:N'
-).properties(width=700, height=400)
+).transform_filter(
+    vehicle_type_selection
+).properties(width=700, height=400, title="Range by Vehicle Type (Filtered)")
+
 st.altair_chart(box, use_container_width=True)
 
-# Pie Chart: Distribution of Vehicle Types
-st.subheader("Distribution of Vehicle Types")
-type_counts = filtered_df['Electric Vehicle Type'].value_counts().reset_index()
-type_counts.columns = ['Vehicle Type', 'Count']
-pie = alt.Chart(type_counts).mark_arc().encode(
-    theta=alt.Theta(field="Count", type="quantitative"),
-    color=alt.Color(field="Vehicle Type", type="nominal"),
-    tooltip=['Vehicle Type', 'Count']
-).properties(width=700, height=400)
-st.altair_chart(pie, use_container_width=True)
-
-# Area Chart: Cumulative Vehicle Count Over Years
-st.subheader("Cumulative Vehicle Count Over Years")
-yearly_counts = filtered_df.groupby('Model Year').size().reset_index(name='Count')
-yearly_counts['Cumulative Count'] = yearly_counts['Count'].cumsum()
-area = alt.Chart(yearly_counts).mark_area().encode(
-    x=alt.X('Model Year:O', title="Model Year"),
-    y=alt.Y('Cumulative Count:Q', title="Cumulative Vehicle Count"),
-    tooltip=['Model Year', 'Cumulative Count']
-).properties(width=700, height=400)
-st.altair_chart(area, use_container_width=True)
-
-# Heatmap: Vehicle Count by Make and Model Year
-st.subheader("Vehicle Count by Make and Model Year")
-heatmap_data = filtered_df.groupby(['Make', 'Model Year']).size().reset_index(name='Count')
+# 5. Heatmap with Pre-aggregation
+top_makes_heatmap = (
+    filtered_df['Make']
+    .value_counts()
+    .head(10)
+    .index
+    .tolist()
+)
+heatmap_data = (
+    filtered_df[filtered_df['Make'].isin(top_makes_heatmap)]
+    .groupby(['Make', 'Model Year'])
+    .size()
+    .reset_index(name='Count')
+)
 heatmap = alt.Chart(heatmap_data).mark_rect().encode(
     x=alt.X('Model Year:O', title="Model Year"),
     y=alt.Y('Make:N', title="Make"),
     color=alt.Color('Count:Q', scale=alt.Scale(scheme='viridis')),
     tooltip=['Make', 'Model Year', 'Count']
-).properties(width=700, height=400)
+).transform_filter(
+    vehicle_type_selection
+).properties(width=700, height=400, title="Vehicle Count by Make and Year (Filtered)")
+
 st.altair_chart(heatmap, use_container_width=True)
-
-# Scatter Plot: Electric Range vs. Model Year
-st.subheader("Electric Range vs. Model Year")
-scatter = alt.Chart(filtered_df).mark_circle(size=60).encode(
-    x=alt.X('Model Year:O', title="Model Year"),
-    y=alt.Y('Electric Range:Q', title="Electric Range (miles)"),
-    color='Electric Vehicle Type:N',
-    tooltip=['Make', 'Model Year', 'Electric Range']
-).interactive().properties(width=700, height=400)
-st.altair_chart(scatter, use_container_width=True)
-
-# Faceted Line Charts: Electric Range Trends by Vehicle Type
-st.subheader("Electric Range Trends by Vehicle Type")
-line = alt.Chart(filtered_df).mark_line().encode(
-    x=alt.X('Model Year:O', title="Model Year"),
-    y=alt.Y('mean(Electric Range):Q', title="Average Electric Range"),
-    color='Electric Vehicle Type:N'
-).facet(
-    column='Electric Vehicle Type:N'
-).properties(width=200, height=200)
-st.altair_chart(line, use_container_width=True)
