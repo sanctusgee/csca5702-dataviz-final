@@ -82,7 +82,6 @@ For optimal performance, the platform uses intelligent sampling (5,000 data poin
 ### Project Highlights
 
 **Data Source**
-WA State Open Data Portal
 This project uses the official [Washington State Electric Vehicle Population Data ](https://data.wa.gov/Transportation/Electric-Vehicle-Population-Data/f6w7-q2d2/about_data)from the Department of Licensing:
 - Contains: 150,000+ records of Battery Electric Vehicles (BEVs) and Plug-in Hybrid Electric Vehicles (PHEVs)
 - Attributes: Make, model, electric range, pricing, geographic distribution, registration dates
@@ -90,8 +89,8 @@ This project uses the official [Washington State Electric Vehicle Population Dat
 
 **Course Information**
 
-CSCA 5702 - Fundamentals of Data Visualization
-University of Colorado Boulder
+- CSCA 5702 - Fundamentals of Data Visualization
+- University of Colorado Boulder
 
 **License**
 
