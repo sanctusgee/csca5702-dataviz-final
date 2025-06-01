@@ -76,6 +76,24 @@ st.markdown("""
         font-weight: 600;
     }
 
+    .clickable-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem;
+        border-radius: 10px;
+        color: white;
+        margin: 0.5rem 0;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+        border: none;
+        width: 100%;
+        text-align: left;
+    }
+
+    .clickable-section:hover {
+        transform: translateX(5px);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+
     .price-tag {
         background: linear-gradient(135deg, #2ECC71, #27AE60);
         color: white;
@@ -94,6 +112,15 @@ st.markdown("""
     .stAlert {
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .footer-text {
+        text-align: center;
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 3rem;
+        padding: 1rem;
+        border-top: 1px solid #eee;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -160,6 +187,8 @@ def init_session_state():
     if 'selected_counties' not in st.session_state:
         if 'County' in st.session_state.df.columns:
             st.session_state.selected_counties = st.session_state.df['County'].unique().tolist()
+        else:
+            st.session_state.selected_counties = []
     if 'year_range' not in st.session_state:
         min_year = int(st.session_state.df['Model Year'].min())
         max_year = int(st.session_state.df['Model Year'].max())
@@ -168,6 +197,8 @@ def init_session_state():
         min_price = int(st.session_state.df['Base MSRP'].min())
         max_price = int(st.session_state.df['Base MSRP'].max())
         st.session_state.price_range = (min_price, max_price)
+    if 'current_page' not in st.session_state:
+        st.session_state.current_page = "Home"
 
 
 # Advanced Sidebar Filtering
@@ -176,6 +207,45 @@ def create_sidebar_filters():
     if st.session_state.df.empty:
         return None, None
 
+    # Navigation at top of sidebar
+    st.sidebar.markdown("### Navigate to Section")
+    pages = {
+        "Home": "home",
+        "Executive Dashboard": "overview",
+        "Price Analytics": "price",
+        "Geographic Insights": "geographic",
+        "Performance Analysis": "performance",
+        "Market Leaders": "leaders",
+        "Distribution Analysis": "distribution",
+        "Market Share": "pie",
+        "Box Analysis": "boxplot",
+        "Heatmap Analysis": "heatmap",
+        "Trends Analysis": "trends"
+    }
+
+    selected = st.sidebar.selectbox("Choose Page:", list(pages.keys()),
+                                    index=list(pages.keys()).index(st.session_state.current_page),
+                                    key="navigation")
+    st.session_state.current_page = selected
+
+    # Real-Time Analytics at top
+    st.sidebar.markdown("### Real-Time Analytics")
+    if not st.session_state.df.empty:
+        # Quick preview metrics before filtering
+        col1, col2 = st.sidebar.columns(2)
+        with col1:
+            st.metric("Total Vehicles", f"{len(st.session_state.df):,}")
+            if 'Base MSRP' in st.session_state.df.columns:
+                avg_price = st.session_state.df['Base MSRP'].mean()
+                st.metric("Avg Price", f"${avg_price:,.0f}")
+        with col2:
+            avg_range = st.session_state.df['Electric Range'].mean()
+            st.metric("Avg Range", f"{avg_range:.0f} mi")
+            if 'County' in st.session_state.df.columns:
+                unique_counties = st.session_state.df['County'].nunique()
+                st.metric("Counties", f"{unique_counties}")
+
+    st.sidebar.markdown("---")
     st.sidebar.markdown("### Advanced Filter Controls")
 
     # Year Range Slider
@@ -183,8 +253,9 @@ def create_sidebar_filters():
     max_year = int(st.session_state.df['Model Year'].max())
     year_range = st.sidebar.slider(
         "Model Year Range",
-        min_year, max_year,
-        st.session_state.year_range,
+        min_value=min_year,
+        max_value=max_year,
+        value=st.session_state.year_range,
         key="year_slider"
     )
     st.session_state.year_range = year_range
@@ -197,8 +268,9 @@ def create_sidebar_filters():
         max_price = int(st.session_state.df['Base MSRP'].max())
         price_filter = st.sidebar.slider(
             "MSRP ($)",
-            min_price, max_price,
-            st.session_state.price_range,
+            min_value=min_price,
+            max_value=max_price,
+            value=st.session_state.price_range,
             format="$%d",
             key="price_slider"
         )
@@ -211,14 +283,11 @@ def create_sidebar_filters():
 
         col1, col2 = st.sidebar.columns(2)
         with col1:
-            select_all_counties = st.checkbox("All Counties", value=True, key="select_all_counties")
+            if st.button("All Counties", key="select_all_counties"):
+                st.session_state.selected_counties = counties
         with col2:
-            clear_counties = st.button("Clear", key="clear_counties")
-
-        if select_all_counties:
-            st.session_state.selected_counties = counties
-        elif clear_counties:
-            st.session_state.selected_counties = []
+            if st.button("Clear Counties", key="clear_counties"):
+                st.session_state.selected_counties = []
 
         selected_counties = st.sidebar.multiselect(
             "Select Counties:",
@@ -234,15 +303,11 @@ def create_sidebar_filters():
 
     col1, col2 = st.sidebar.columns(2)
     with col1:
-        select_all_makes = st.checkbox("All Makes", value=len(st.session_state.selected_makes) == len(makes),
-                                       key="select_all_makes")
+        if st.button("All Makes", key="select_all_makes"):
+            st.session_state.selected_makes = makes
     with col2:
-        clear_makes = st.button("Clear", key="clear_makes")
-
-    if select_all_makes:
-        st.session_state.selected_makes = makes
-    elif clear_makes:
-        st.session_state.selected_makes = []
+        if st.button("Clear Makes", key="clear_makes"):
+            st.session_state.selected_makes = []
 
     selected_makes = st.sidebar.multiselect(
         "Choose Makes:",
@@ -258,15 +323,11 @@ def create_sidebar_filters():
 
     col1, col2 = st.sidebar.columns(2)
     with col1:
-        select_all_types = st.checkbox("All Types", value=len(st.session_state.selected_types) == len(vehicle_types),
-                                       key="select_all_types")
+        if st.button("All Types", key="select_all_types"):
+            st.session_state.selected_types = vehicle_types
     with col2:
-        clear_types = st.button("Clear", key="clear_types")
-
-    if select_all_types:
-        st.session_state.selected_types = vehicle_types
-    elif clear_types:
-        st.session_state.selected_types = []
+        if st.button("Clear Types", key="clear_types"):
+            st.session_state.selected_types = []
 
     selected_types = st.sidebar.multiselect(
         "Choose Types:",
@@ -289,8 +350,9 @@ def create_sidebar_filters():
     max_range = int(st.session_state.df['Electric Range'].max())
     range_filter = st.sidebar.slider(
         "Range (miles)",
-        min_range, max_range,
-        (min_range, max_range),
+        min_value=min_range,
+        max_value=max_range,
+        value=(min_range, max_range),
         key="range_slider"
     )
 
@@ -321,32 +383,32 @@ def create_sidebar_filters():
 
     # Sample Mode
     st.sidebar.markdown("#### Display Options")
-    use_sample = st.sidebar.checkbox("Sample Mode (10,000 points)", value=True, key="sample_mode")
+    use_sample = st.sidebar.checkbox("Sample Mode (5,000 points)", value=True, key="sample_mode")
 
     total_records = len(filtered_df)
-    if use_sample and total_records > 10000:
-        display_df = filtered_df.sample(n=10000, random_state=42)
-        st.sidebar.warning(f"Showing 10,000 of {total_records:,} records")
+    if use_sample and total_records > 5000:
+        display_df = filtered_df.sample(n=5000, random_state=42)
+        st.sidebar.warning(f"Showing 5,000 of {total_records:,} records")
     else:
         display_df = filtered_df
         st.sidebar.success(f"Showing all {total_records:,} records")
 
-    # Dataset Info
+    # Updated Dataset Info after filtering
     st.sidebar.markdown("---")
-    st.sidebar.markdown("### Real-Time Analytics")
+    st.sidebar.markdown("### Filtered Results")
     if not filtered_df.empty:
         col1, col2 = st.sidebar.columns(2)
         with col1:
-            st.metric("Total Vehicles", f"{total_records:,}")
+            st.metric("Filtered Total", f"{total_records:,}")
             if 'Base MSRP' in filtered_df.columns:
-                avg_price = filtered_df['Base MSRP'].mean()
-                st.metric("Avg Price", f"${avg_price:,.0f}")
+                filtered_avg_price = filtered_df['Base MSRP'].mean()
+                st.metric("Filtered Avg Price", f"${filtered_avg_price:,.0f}")
         with col2:
-            avg_range = filtered_df['Electric Range'].mean()
-            st.metric("Avg Range", f"{avg_range:.0f} mi")
+            filtered_avg_range = filtered_df['Electric Range'].mean()
+            st.metric("Filtered Avg Range", f"{filtered_avg_range:.0f} mi")
             if 'County' in filtered_df.columns:
-                unique_counties = filtered_df['County'].nunique()
-                st.metric("Counties", f"{unique_counties}")
+                filtered_unique_counties = filtered_df['County'].nunique()
+                st.metric("Filtered Counties", f"{filtered_unique_counties}")
 
     return filtered_df, display_df
 
@@ -368,7 +430,11 @@ def create_navigation():
         "Trends Analysis": "trends"
     }
 
-    return st.sidebar.selectbox("Navigate to Section", list(pages.keys()), key="navigation")
+    selected = st.sidebar.selectbox("Navigate to Section", list(pages.keys()),
+                                    index=list(pages.keys()).index(st.session_state.current_page),
+                                    key="navigation")
+    st.session_state.current_page = selected
+    return selected
 
 
 # Color Schemes and Selections
@@ -400,8 +466,8 @@ def home_page():
 
     st.markdown("""
     <div style='text-align: center; font-size: 1.3rem; color: #666; margin-bottom: 3rem;'>
-        Advanced analytics platform for Washington State's electric vehicle ecosystem<br>
-        <em>Data source: Washington State Department of Licensing</em>
+        Submitted for final project CSCA 5702 - Fundamentals of Data Visualization<br>
+        <strong>GitHub:</strong> <a href="https://github.com/yourusername/your-repo" target="_blank">github.com/yourusername/your-repo</a>
     </div>
     """, unsafe_allow_html=True)
 
@@ -500,56 +566,68 @@ def home_page():
 
     st.markdown("---")
 
-    # Navigation guide
+    # Navigation guide with clickable sections
     st.markdown('<h2 class="sub-header">Explore Advanced Analytics</h2>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("""
-        **Price Analytics**
-        - MSRP vs Range performance analysis
-        - Affordability trends by region
-        - Value proposition insights
+        if st.button(
+                "**Price Analytics**\n• MSRP vs Range performance analysis\n• Affordability trends by region\n• Value proposition insights",
+                key="price_nav", help="Click to navigate to Price Analytics"):
+            st.session_state.current_page = "Price Analytics"
+            st.rerun()
 
-        **Geographic Insights** 
-        - County-level adoption patterns
-        - Urban vs rural preferences
-        - Regional market characteristics
+        if st.button(
+                "**Geographic Insights**\n• County-level adoption patterns\n• Urban vs rural preferences\n• Regional market characteristics",
+                key="geo_nav", help="Click to navigate to Geographic Insights"):
+            st.session_state.current_page = "Geographic Insights"
+            st.rerun()
 
-        **Performance Analysis**
-        - Range distribution analysis
-        - Technology advancement trends
-        - Efficiency improvements
+        if st.button(
+                "**Performance Analysis**\n• Range distribution analysis\n• Technology advancement trends\n• Efficiency improvements",
+                key="perf_nav", help="Click to navigate to Performance Analysis"):
+            st.session_state.current_page = "Performance Analysis"
+            st.rerun()
 
-        **Market Leaders**
-        - Brand performance rankings
-        - Model popularity analysis
-        - Competitive landscape
-        """)
+        if st.button(
+                "**Market Leaders**\n• Brand performance rankings\n• Model popularity analysis\n• Competitive landscape",
+                key="leaders_nav", help="Click to navigate to Market Leaders"):
+            st.session_state.current_page = "Market Leaders"
+            st.rerun()
 
     with col2:
-        st.markdown("""
-        **Distribution Analysis**
-        - Electric range histograms
-        - Statistical distribution insights
-        - Frequency analysis by vehicle type
+        if st.button(
+                "**Distribution Analysis**\n• Electric range histograms\n• Statistical distribution insights\n• Frequency analysis by vehicle type",
+                key="dist_nav", help="Click to navigate to Distribution Analysis"):
+            st.session_state.current_page = "Distribution Analysis"
+            st.rerun()
 
-        **Market Share**
-        - Vehicle type market composition
-        - Interactive pie chart visualization
-        - Proportional analysis
+        if st.button(
+                "**Market Share**\n• Vehicle type market composition\n• Interactive pie chart visualization\n• Proportional analysis",
+                key="share_nav", help="Click to navigate to Market Share"):
+            st.session_state.current_page = "Market Share"
+            st.rerun()
 
-        **Box Analysis**
-        - Range distribution by vehicle type
-        - Outlier identification
-        - Statistical quartile analysis
+        if st.button(
+                "**Box Analysis**\n• Range distribution by vehicle type\n• Outlier identification\n• Statistical quartile analysis",
+                key="box_nav", help="Click to navigate to Box Analysis"):
+            st.session_state.current_page = "Box Analysis"
+            st.rerun()
 
-        **Heatmap & Trends**
-        - Make vs. model year correlation
-        - Time-based trend analysis
-        - Pattern recognition
-        """)
+        if st.button(
+                "**Heatmap Analysis**\n• Make vs. model year correlation\n• Time-based trend analysis\n• Pattern recognition",
+                key="heatmap_nav", help="Click to navigate to Heatmap Analysis"):
+            st.session_state.current_page = "Heatmap Analysis"
+            st.rerun()
+
+    # Footer
+    st.markdown("""
+    <div class="footer-text">
+        Data source: Washington State Department of Licensing<br>
+        Electric Vehicle Population Data
+    </div>
+    """, unsafe_allow_html=True)
 
 
 def overview_page(filtered_df, display_df):
@@ -1273,11 +1351,11 @@ def main():
         st.error("Unable to load data. Please check your dataset.")
         return
 
-    # Create filters and get data
+    # Create filters and get data (navigation is now included in sidebar)
     filtered_df, display_df = create_sidebar_filters()
 
-    # Navigation
-    selected_page = create_navigation()
+    # Get current page from session state
+    selected_page = st.session_state.current_page
 
     # Route to appropriate page
     if "Home" in selected_page:
