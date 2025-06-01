@@ -89,11 +89,14 @@ This project uses the official [Washington State Electric Vehicle Population Dat
 
 
 **Course Information**
-Course: CSCA 5702 - Fundamentals of Data Visualization
+
+CSCA 5702 - Fundamentals of Data Visualization
 University of Colorado Boulder
 
 **License**
+
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 **Contributing**
+
 This is an academic project, but feedback and suggestions are welcome! Please feel free to open an issue or submit a pull request.
