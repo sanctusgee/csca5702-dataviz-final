@@ -345,7 +345,7 @@ def create_sidebar_filters():
 
         # Modern multiselect with better UX
         selected_counties = st.sidebar.multiselect(
-            "",
+            "Select Counties",
             counties,
             default=st.session_state.selected_counties,
             key="counties_multiselect",
@@ -381,7 +381,7 @@ def create_sidebar_filters():
             st.rerun()
 
     selected_makes = st.sidebar.multiselect(
-        "",
+        "Select Makes",
         makes,
         default=st.session_state.selected_makes,
         key="makes_multiselect",
@@ -417,7 +417,7 @@ def create_sidebar_filters():
             st.rerun()
 
     selected_types = st.sidebar.multiselect(
-        "",
+        "Select Vehicle Types",
         vehicle_types,
         default=st.session_state.selected_types,
         key="types_multiselect",
