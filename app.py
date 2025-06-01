@@ -11,6 +11,25 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# I am adding this because I notice that the app is not responsive on mobile devices
+# and I want to provide a toggle for mobile mode
+if 'mobile_mode' not in st.session_state:
+    st.session_state.mobile_mode = False
+
+# Add mobile toggle in sidebar (after your existing filters)
+st.sidebar.markdown("---")
+if st.sidebar.button("Toggle Mobile Mode"):
+    st.session_state.mobile_mode = not st.session_state.mobile_mode
+    st.rerun()
+
+if st.session_state.mobile_mode:
+    st.sidebar.success("Mobile mode active")
+    # Use smaller sample size for mobile, instead of 5000
+    SAMPLE_SIZE = 1000
+else:
+    SAMPLE_SIZE = 5000  # current sample size for desktop
+
+
 # I am using minimal CSS for my professional looking styling
 st.markdown("""
 <style>
@@ -200,6 +219,12 @@ def load_data():
             df['County'] = df['County'].str.title()
         if 'City' in df.columns:
             df['City'] = df['City'].str.title()
+
+        # ALright - this is where I check for device type (mobile or desktop)
+        if st.session_state.get('mobile_mode', False) and len(df) > 1000:
+            df = df.sample(n=1000, random_state=42)
+        elif len(df) > 5000:
+            df = df.sample(n=5000, random_state=42)
 
         return df
     except FileNotFoundError:
