@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for professional styling
+# I am using minimal CSS for my professional looking styling
 st.markdown("""
 <style>
     .main-header {
@@ -541,7 +541,7 @@ def home_page():
     st.markdown("""
     <div style='text-align: center; font-size: 1.3rem; color: #666; margin-bottom: 3rem;'>
         Submitted for final project CSCA 5702 - Fundamentals of Data Visualization<br>
-        <strong>GitHub:</strong> <a href="https://github.com/yourusername/your-repo" target="_blank">github.com/yourusername/your-repo</a>
+        <strong>GitHub:</strong> <a href="https://sanctusgee/csca5702-dataviz-final.git" target="_blank">CSCA5702-Final-Project</a>
     </div>
     """, unsafe_allow_html=True)
 
@@ -698,7 +698,7 @@ def home_page():
     # Footer
     st.markdown("""
     <div class="footer-text">
-        Data source: Washington State Department of Licensing<br>
+        Data source: (c) Washington State Department of Licensing - https://data.wa.gov/Transportation/Electric-Vehicle-Population-Data/f6w7-q2d2/about_data<br>
         Electric Vehicle Population Data
     </div>
     """, unsafe_allow_html=True)
