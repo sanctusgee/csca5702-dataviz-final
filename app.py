@@ -276,10 +276,21 @@ def create_sidebar_filters():
         )
         st.session_state.price_range = price_filter
 
+    # Initialize variables
+    selected_counties = []
+
     # Geographic Filters
     if 'County' in st.session_state.df.columns:
         st.sidebar.markdown("#### Geographic Filters")
         counties = sorted(st.session_state.df['County'].dropna().unique().tolist())
+
+        # Ensure selected_counties are valid (intersection with current counties)
+        if not st.session_state.selected_counties:
+            st.session_state.selected_counties = counties
+        valid_selected_counties = [c for c in st.session_state.selected_counties if c in counties]
+        if not valid_selected_counties:  # If no valid counties, default to all
+            valid_selected_counties = counties
+        st.session_state.selected_counties = valid_selected_counties
 
         col1, col2 = st.sidebar.columns(2)
         with col1:
@@ -301,6 +312,14 @@ def create_sidebar_filters():
     st.sidebar.markdown("#### Vehicle Makes")
     makes = sorted(st.session_state.df['Make'].unique().tolist())
 
+    # Ensure selected_makes are valid
+    if not st.session_state.selected_makes:
+        st.session_state.selected_makes = makes
+    valid_selected_makes = [m for m in st.session_state.selected_makes if m in makes]
+    if not valid_selected_makes:  # If no valid makes, default to all
+        valid_selected_makes = makes
+    st.session_state.selected_makes = valid_selected_makes
+
     col1, col2 = st.sidebar.columns(2)
     with col1:
         if st.button("All Makes", key="select_all_makes"):
@@ -320,6 +339,14 @@ def create_sidebar_filters():
     # Vehicle Types Selection
     st.sidebar.markdown("#### Vehicle Types")
     vehicle_types = sorted(st.session_state.df['Electric Vehicle Type'].unique().tolist())
+
+    # Ensure selected_types are valid
+    if not st.session_state.selected_types:
+        st.session_state.selected_types = vehicle_types
+    valid_selected_types = [t for t in st.session_state.selected_types if t in vehicle_types]
+    if not valid_selected_types:  # If no valid types, default to all
+        valid_selected_types = vehicle_types
+    st.session_state.selected_types = valid_selected_types
 
     col1, col2 = st.sidebar.columns(2)
     with col1:
@@ -356,14 +383,20 @@ def create_sidebar_filters():
         key="range_slider"
     )
 
-    # Apply all filters
-    filtered_df = st.session_state.df[
-        (st.session_state.df['Make'].isin(selected_makes)) &
-        (st.session_state.df['Electric Vehicle Type'].isin(selected_types)) &
-        (st.session_state.df['Model Year'] >= year_range[0]) &
-        (st.session_state.df['Model Year'] <= year_range[1]) &
-        (st.session_state.df['Electric Range'] >= range_filter[0]) &
-        (st.session_state.df['Electric Range'] <= range_filter[1])
+    # Start with base dataframe and apply filters step by step
+    filtered_df = st.session_state.df.copy()
+
+    # Apply all filters (ensuring we don't filter if no selections)
+    if selected_makes:  # Only filter if there are selected makes
+        filtered_df = filtered_df[filtered_df['Make'].isin(selected_makes)]
+    if selected_types:  # Only filter if there are selected types
+        filtered_df = filtered_df[filtered_df['Electric Vehicle Type'].isin(selected_types)]
+
+    filtered_df = filtered_df[
+        (filtered_df['Model Year'] >= year_range[0]) &
+        (filtered_df['Model Year'] <= year_range[1]) &
+        (filtered_df['Electric Range'] >= range_filter[0]) &
+        (filtered_df['Electric Range'] <= range_filter[1])
         ]
 
     # Apply geographic filter
