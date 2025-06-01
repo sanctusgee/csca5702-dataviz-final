@@ -231,7 +231,6 @@ def load_data():
         st.error("Dataset not found. Please ensure the WA State EV data is available.")
         return pd.DataFrame()
 
-
 # Initialize session state
 def init_session_state():
     """Initialize session state variables"""
