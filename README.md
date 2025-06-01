@@ -12,7 +12,7 @@ An interactive data visualization platform for exploring Washington State's elec
 - **11 Specialized Analysis Pages** covering market trends, pricing, geographic distribution, and performance metrics
 - **Advanced Filtering System** with real-time updates across year ranges, price brackets, vehicle makes, types, and counties
 - **Cross-Chart Interactivity** - click on any chart element to filter all related visualizations
-- **Professional UI/UX** with gradient styling, hover effects, and modern design patterns
+- **UI/UX with gradient styling**, hover effects, and modern design patterns
 
 ### Key Visualizations
 - Executive Dashboard with comprehensive KPIs and cross-filtering
@@ -57,13 +57,6 @@ streamlit run app.py
 ```
 4. **Open your browser** to http://localhost:8501
 
-Data Source
-This project uses the official Washington State Electric Vehicle Population Data from the Department of Licensing:
-
-**Source**: WA State Open Data Portal
-Contains: 150,000+ records of Battery Electric Vehicles (BEVs) and Plug-in Hybrid Electric Vehicles (PHEVs)
-Attributes: Make, model, electric range, pricing, geographic distribution, registration dates
-
 ### Usage
 
 **Navigation**
@@ -85,24 +78,22 @@ Use the sidebar dropdown to navigate between different analysis pages:
 **Sample Mode**
 For optimal performance, the platform uses intelligent sampling (5,000 data points) while preserving analytical accuracy. Toggle this in the sidebar display options.
 
-**Project Highlights**
+---
+### Project Highlights
 
-Professional deployment using Streamlit's native hosting capabilities
-Advanced interactivity with cross-chart filtering and brush selection
-Scalable architecture handling 150K+ records with smart sampling
-Modern design with gradient styling and responsive layouts
-Comprehensive analytics covering 11 different analytical perspectives
+**Data Source**
+WA State Open Data Portal
+This project uses the official [Washington State Electric Vehicle Population Data ](https://data.wa.gov/Transportation/Electric-Vehicle-Population-Data/f6w7-q2d2/about_data)from the Department of Licensing:
+- Contains: 150,000+ records of Battery Electric Vehicles (BEVs) and Plug-in Hybrid Electric Vehicles (PHEVs)
+- Attributes: Make, model, electric range, pricing, geographic distribution, registration dates
+
 
 **Course Information**
 Course: CSCA 5702 - Fundamentals of Data Visualization
 University of Colorado Boulder
-
 
 **License**
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 **Contributing**
 This is an academic project, but feedback and suggestions are welcome! Please feel free to open an issue or submit a pull request.
-
-**Contact**
-For questions about this project, please open an issue on GitHub.
