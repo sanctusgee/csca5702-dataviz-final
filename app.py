@@ -1,9 +1,6 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import numpy as np
 
 # Page Configuration
@@ -364,28 +361,36 @@ def create_navigation():
         "Geographic Insights": "geographic",
         "Performance Analysis": "performance",
         "Market Leaders": "leaders",
-        "Policy Impact": "policy",
-        "Model Deep Dive": "models",
-        "Utility Analysis": "utilities",
-        "Advanced Analytics": "advanced"
+        "Distribution Analysis": "distribution",
+        "Market Share": "pie",
+        "Box Analysis": "boxplot",
+        "Heatmap Analysis": "heatmap",
+        "Trends Analysis": "trends"
     }
 
     return st.sidebar.selectbox("Navigate to Section", list(pages.keys()), key="navigation")
 
 
-# Color Schemes
+# Color Schemes and Selections
 def get_color_schemes():
-    """Define professional color schemes"""
+    """Define professional color schemes for Altair"""
     return {
-        'categorical': px.colors.qualitative.Set3,
-        'sequential': px.colors.sequential.Viridis,
-        'diverging': px.colors.diverging.RdYlBu,
-        'makes': px.colors.qualitative.Pastel,
-        'types': px.colors.qualitative.Bold,
-        'price': px.colors.sequential.Plasma,
-        'geographic': px.colors.sequential.Blues,
-        'performance': px.colors.sequential.Turbo
+        'categorical': 'category20',
+        'sequential': 'viridis',
+        'diverging': 'redyellowblue',
+        'makes': 'set3',
+        'types': 'dark2',
+        'price': 'plasma',
+        'geographic': 'blues',
+        'performance': 'turbo'
     }
+
+
+def create_selections():
+    """Create Altair selections for interactivity"""
+    click_selection = alt.selection_point(fields=['Electric Vehicle Type'])
+    brush_selection = alt.selection_interval()
+    return click_selection, brush_selection
 
 
 # Individual Page Functions
@@ -525,25 +530,25 @@ def home_page():
 
     with col2:
         st.markdown("""
-        **Policy Impact**
-        - CAFV eligibility analysis
-        - Legislative district patterns
-        - Incentive effectiveness
+        **Distribution Analysis**
+        - Electric range histograms
+        - Statistical distribution insights
+        - Frequency analysis by vehicle type
 
-        **Model Deep Dive**
-        - Specific model analytics
-        - Feature comparison
-        - Consumer preferences
+        **Market Share**
+        - Vehicle type market composition
+        - Interactive pie chart visualization
+        - Proportional analysis
 
-        **Utility Analysis**
-        - Electric utility territories
-        - Infrastructure correlation
-        - Service area insights
+        **Box Analysis**
+        - Range distribution by vehicle type
+        - Outlier identification
+        - Statistical quartile analysis
 
-        **Advanced Analytics**
-        - Multi-dimensional analysis
-        - Predictive insights
-        - Market forecasting
+        **Heatmap & Trends**
+        - Make vs. model year correlation
+        - Time-based trend analysis
+        - Pattern recognition
         """)
 
 
@@ -598,33 +603,34 @@ def overview_page(filtered_df, display_df):
         if len(filtered_df) > 100:
             yearly_trends = filtered_df.groupby(['Model Year', 'Electric Vehicle Type']).size().reset_index(
                 name='Count')
-            fig_trends = px.area(
-                yearly_trends,
-                x='Model Year',
-                y='Count',
-                color='Electric Vehicle Type',
-                color_discrete_sequence=get_color_schemes()['categorical'],
+
+            chart = alt.Chart(yearly_trends).mark_area().encode(
+                x=alt.X('Model Year:O', title='Model Year'),
+                y=alt.Y('Count:Q', title='Number of Vehicles'),
+                color=alt.Color('Electric Vehicle Type:N', scale=alt.Scale(scheme='category20')),
+                tooltip=['Model Year', 'Electric Vehicle Type', 'Count']
+            ).properties(
+                width=350,
+                height=400,
                 title="Market Evolution by Vehicle Type"
             )
-            fig_trends.update_layout(height=400)
-            st.plotly_chart(fig_trends, use_container_width=True)
+            st.altair_chart(chart, use_container_width=True)
 
     with col2:
         # Price vs Performance scatter
         if 'Base MSRP' in filtered_df.columns:
-            fig_scatter = px.scatter(
-                display_df,
-                x='Electric Range',
-                y='Base MSRP',
-                color='Electric Vehicle Type',
-                size='Model Year',
-                hover_data=['Make', 'Model'],
-                color_discrete_sequence=get_color_schemes()['types'],
-                title="Price vs Performance Matrix",
-                opacity=0.7
-            )
-            fig_scatter.update_layout(height=400)
-            st.plotly_chart(fig_scatter, use_container_width=True)
+            scatter = alt.Chart(display_df).mark_circle(size=60, opacity=0.7).encode(
+                x=alt.X('Electric Range:Q', title='Electric Range (miles)'),
+                y=alt.Y('Base MSRP:Q', title='Base MSRP ($)', scale=alt.Scale(type='log')),
+                color=alt.Color('Electric Vehicle Type:N', scale=alt.Scale(scheme='dark2')),
+                size=alt.Size('Model Year:O', scale=alt.Scale(range=[50, 200])),
+                tooltip=['Make', 'Model', 'Electric Range', 'Base MSRP', 'Electric Vehicle Type']
+            ).properties(
+                width=350,
+                height=400,
+                title="Price vs Performance Matrix"
+            ).interactive()
+            st.altair_chart(scatter, use_container_width=True)
 
     # Geographic and competitive analysis
     col1, col2 = st.columns(2)
@@ -635,34 +641,33 @@ def overview_page(filtered_df, display_df):
             county_adoption = filtered_df['County'].value_counts().head(10).reset_index()
             county_adoption.columns = ['County', 'Count']
 
-            fig_counties = px.bar(
-                county_adoption,
-                x='Count',
-                y='County',
-                orientation='h',
-                color='Count',
-                color_continuous_scale='Viridis',
+            bar_chart = alt.Chart(county_adoption).mark_bar().encode(
+                x=alt.X('Count:Q', title='Number of Vehicles'),
+                y=alt.Y('County:N', sort='-x', title='County'),
+                color=alt.Color('Count:Q', scale=alt.Scale(scheme='viridis')),
+                tooltip=['County', 'Count']
+            ).properties(
+                width=350,
+                height=400,
                 title="Top Counties by EV Adoption"
             )
-            fig_counties.update_layout(height=400)
-            st.plotly_chart(fig_counties, use_container_width=True)
+            st.altair_chart(bar_chart, use_container_width=True)
 
     with col2:
         # Brand market share
         brand_share = filtered_df['Make'].value_counts().head(8).reset_index()
         brand_share.columns = ['Make', 'Count']
-        brand_share['Percentage'] = (brand_share['Count'] / brand_share['Count'].sum() * 100).round(1)
 
-        fig_brands = px.pie(
-            brand_share,
-            values='Count',
-            names='Make',
-            color_discrete_sequence=get_color_schemes()['makes'],
+        pie_chart = alt.Chart(brand_share).mark_arc().encode(
+            theta=alt.Theta('Count:Q'),
+            color=alt.Color('Make:N', scale=alt.Scale(scheme='set3')),
+            tooltip=['Make', 'Count']
+        ).properties(
+            width=350,
+            height=400,
             title="Brand Market Share (Top 8)"
         )
-        fig_brands.update_traces(textposition='inside', textinfo='percent+label')
-        fig_brands.update_layout(height=400)
-        st.plotly_chart(fig_brands, use_container_width=True)
+        st.altair_chart(pie_chart, use_container_width=True)
 
 
 def price_page(filtered_df, display_df):
@@ -699,33 +704,35 @@ def price_page(filtered_df, display_df):
 
     with col1:
         # Price distribution histogram
-        fig_price_dist = px.histogram(
-            filtered_df,
-            x='Base MSRP',
-            color='Electric Vehicle Type',
-            nbins=30,
-            color_discrete_sequence=get_color_schemes()['types'],
+        histogram = alt.Chart(filtered_df).mark_bar().encode(
+            x=alt.X('Base MSRP:Q', bin=alt.Bin(maxbins=30), title='Base MSRP ($)'),
+            y=alt.Y('count()', title='Number of Vehicles'),
+            color=alt.Color('Electric Vehicle Type:N', scale=alt.Scale(scheme='dark2')),
+            tooltip=['count()']
+        ).properties(
+            width=350,
+            height=400,
             title="Price Distribution by Vehicle Type"
         )
-        fig_price_dist.update_layout(height=400)
-        st.plotly_chart(fig_price_dist, use_container_width=True)
+        st.altair_chart(histogram, use_container_width=True)
 
     with col2:
-        # Price vs Range efficiency
-        filtered_df['Price_per_Mile'] = filtered_df['Base MSRP'] / filtered_df['Electric Range']
-        efficiency_data = filtered_df.groupby('Make')['Price_per_Mile'].mean().sort_values().head(10).reset_index()
+        # Price efficiency analysis
+        filtered_df_copy = filtered_df.copy()
+        filtered_df_copy['Price_per_Mile'] = filtered_df_copy['Base MSRP'] / filtered_df_copy['Electric Range']
+        efficiency_data = filtered_df_copy.groupby('Make')['Price_per_Mile'].mean().sort_values().head(10).reset_index()
 
-        fig_efficiency = px.bar(
-            efficiency_data,
-            x='Price_per_Mile',
-            y='Make',
-            orientation='h',
-            color='Price_per_Mile',
-            color_continuous_scale='RdYlGn_r',
-            title="Price Efficiency ($/mile range)"
+        efficiency_chart = alt.Chart(efficiency_data).mark_bar().encode(
+            x=alt.X('Price_per_Mile:Q', title='Price per Mile ($)'),
+            y=alt.Y('Make:N', sort='-x', title='Make'),
+            color=alt.Color('Price_per_Mile:Q', scale=alt.Scale(scheme='plasma')),
+            tooltip=['Make', alt.Tooltip('Price_per_Mile:Q', format='.2f')]
+        ).properties(
+            width=350,
+            height=400,
+            title="Price Efficiency by Make"
         )
-        fig_efficiency.update_layout(height=400)
-        st.plotly_chart(fig_efficiency, use_container_width=True)
+        st.altair_chart(efficiency_chart, use_container_width=True)
 
     # Advanced price analysis
     col1, col2 = st.columns(2)
@@ -734,57 +741,34 @@ def price_page(filtered_df, display_df):
         # Price trends over time
         price_trends = filtered_df.groupby(['Model Year', 'Electric Vehicle Type'])['Base MSRP'].mean().reset_index()
 
-        fig_price_trends = px.line(
-            price_trends,
-            x='Model Year',
-            y='Base MSRP',
-            color='Electric Vehicle Type',
-            color_discrete_sequence=get_color_schemes()['categorical'],
-            title="Average Price Trends Over Time",
-            markers=True
+        trend_chart = alt.Chart(price_trends).mark_line(point=True).encode(
+            x=alt.X('Model Year:O', title='Model Year'),
+            y=alt.Y('Base MSRP:Q', title='Average Price ($)'),
+            color=alt.Color('Electric Vehicle Type:N', scale=alt.Scale(scheme='category20')),
+            tooltip=['Model Year', 'Electric Vehicle Type', alt.Tooltip('Base MSRP:Q', format='$,.0f')]
+        ).properties(
+            width=350,
+            height=400,
+            title="Average Price Trends Over Time"
         )
-        fig_price_trends.update_layout(height=400)
-        st.plotly_chart(fig_price_trends, use_container_width=True)
+        st.altair_chart(trend_chart, use_container_width=True)
 
     with col2:
-        # Price categories pie chart
+        # Price categories
         if 'Price_Category' in filtered_df.columns:
             price_cat_dist = filtered_df['Price_Category'].value_counts().reset_index()
             price_cat_dist.columns = ['Category', 'Count']
 
-            fig_price_cat = px.pie(
-                price_cat_dist,
-                values='Count',
-                names='Category',
-                color_discrete_sequence=get_color_schemes()['price'],
+            pie_chart = alt.Chart(price_cat_dist).mark_arc().encode(
+                theta=alt.Theta('Count:Q'),
+                color=alt.Color('Category:N', scale=alt.Scale(scheme='plasma')),
+                tooltip=['Category', 'Count']
+            ).properties(
+                width=350,
+                height=400,
                 title="Market Segmentation by Price"
             )
-            fig_price_cat.update_traces(textposition='inside', textinfo='percent+label')
-            fig_price_cat.update_layout(height=400)
-            st.plotly_chart(fig_price_cat, use_container_width=True)
-
-    # Geographic price analysis
-    if 'County' in filtered_df.columns:
-        st.markdown("### Geographic Price Analysis")
-
-        county_price_analysis = filtered_df.groupby('County').agg({
-            'Base MSRP': ['mean', 'median', 'count']
-        }).round(0)
-        county_price_analysis.columns = ['Avg_Price', 'Median_Price', 'Vehicle_Count']
-        county_price_analysis = county_price_analysis[county_price_analysis['Vehicle_Count'] >= 10].sort_values(
-            'Avg_Price', ascending=False).head(15)
-
-        fig_county_prices = px.bar(
-            county_price_analysis.reset_index(),
-            x='County',
-            y='Avg_Price',
-            color='Median_Price',
-            color_continuous_scale='Viridis',
-            title="Average Vehicle Prices by County (Top 15)"
-        )
-        fig_county_prices.update_layout(height=400)
-        fig_county_prices.update_xaxes(tickangle=45)
-        st.plotly_chart(fig_county_prices, use_container_width=True)
+            st.altair_chart(pie_chart, use_container_width=True)
 
 
 def geographic_page(filtered_df, display_df):
@@ -828,120 +812,36 @@ def geographic_page(filtered_df, display_df):
         county_counts = filtered_df['County'].value_counts().head(15).reset_index()
         county_counts.columns = ['County', 'Count']
 
-        fig_counties = px.bar(
-            county_counts,
-            x='Count',
-            y='County',
-            orientation='h',
-            color='Count',
-            color_continuous_scale='Blues',
+        bar_chart = alt.Chart(county_counts).mark_bar().encode(
+            x=alt.X('Count:Q', title='Number of Vehicles'),
+            y=alt.Y('County:N', sort='-x', title='County'),
+            color=alt.Color('Count:Q', scale=alt.Scale(scheme='blues')),
+            tooltip=['County', 'Count']
+        ).properties(
+            width=350,
+            height=500,
             title="Top 15 Counties by EV Adoption"
         )
-        fig_counties.update_layout(height=500)
-        st.plotly_chart(fig_counties, use_container_width=True)
+        st.altair_chart(bar_chart, use_container_width=True)
 
     with col2:
-        # Vehicle type distribution by top counties
+        # Vehicle type distribution by counties
         top_counties = filtered_df['County'].value_counts().head(8).index
         county_type_data = filtered_df[filtered_df['County'].isin(top_counties)]
         county_type_dist = county_type_data.groupby(['County', 'Electric Vehicle Type']).size().reset_index(
             name='Count')
 
-        fig_county_types = px.bar(
-            county_type_dist,
-            x='County',
-            y='Count',
-            color='Electric Vehicle Type',
-            color_discrete_sequence=get_color_schemes()['types'],
+        stacked_bar = alt.Chart(county_type_dist).mark_bar().encode(
+            x=alt.X('County:N', title='County'),
+            y=alt.Y('Count:Q', title='Number of Vehicles'),
+            color=alt.Color('Electric Vehicle Type:N', scale=alt.Scale(scheme='dark2')),
+            tooltip=['County', 'Electric Vehicle Type', 'Count']
+        ).properties(
+            width=350,
+            height=500,
             title="Vehicle Types by Top Counties"
         )
-        fig_county_types.update_layout(height=500)
-        fig_county_types.update_xaxes(tickangle=45)
-        st.plotly_chart(fig_county_types, use_container_width=True)
-
-    # Urban vs Rural analysis
-    if 'City' in filtered_df.columns:
-        col1, col2 = st.columns(2)
-
-        with col1:
-            # Top cities
-            city_counts = filtered_df['City'].value_counts().head(12).reset_index()
-            city_counts.columns = ['City', 'Count']
-
-            fig_cities = px.treemap(
-                city_counts,
-                path=['City'],
-                values='Count',
-                color='Count',
-                color_continuous_scale='Greens',
-                title="Top Cities by EV Adoption"
-            )
-            fig_cities.update_layout(height=400)
-            st.plotly_chart(fig_cities, use_container_width=True)
-
-        with col2:
-            # City vs County comparison
-            city_county_data = filtered_df.groupby(['County', 'City']).size().reset_index(name='Count')
-            city_county_data = city_county_data.sort_values('Count', ascending=False).head(15)
-
-            fig_city_county = px.scatter(
-                city_county_data,
-                x='Count',
-                y='City',
-                color='County',
-                size='Count',
-                color_discrete_sequence=get_color_schemes()['categorical'],
-                title="City-County EV Distribution"
-            )
-            fig_city_county.update_layout(height=400)
-            st.plotly_chart(fig_city_county, use_container_width=True)
-
-    # Price and range analysis by geography
-    if 'Base MSRP' in filtered_df.columns:
-        st.markdown("### Geographic Economic Analysis")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            # Average prices by county
-            county_price_data = filtered_df.groupby('County').agg({
-                'Base MSRP': 'mean',
-                'Electric Range': 'mean'
-            }).reset_index()
-            county_price_data = county_price_data.sort_values('Base MSRP', ascending=False).head(12)
-
-            fig_county_prices = px.scatter(
-                county_price_data,
-                x='Electric Range',
-                y='Base MSRP',
-                size='Base MSRP',
-                color='County',
-                color_discrete_sequence=get_color_schemes()['makes'],
-                title="County Price vs Range Profile"
-            )
-            fig_county_prices.update_layout(height=400)
-            st.plotly_chart(fig_county_prices, use_container_width=True)
-
-        with col2:
-            # Affordability index by county
-            county_affordability = filtered_df.groupby('County').agg({
-                'Base MSRP': ['mean', lambda x: (x < 35000).mean() * 100]
-            }).round(1)
-            county_affordability.columns = ['Avg_Price', 'Affordable_Percent']
-            county_affordability = county_affordability.reset_index().sort_values('Affordable_Percent',
-                                                                                  ascending=False).head(12)
-
-            fig_affordability = px.bar(
-                county_affordability,
-                x='Affordable_Percent',
-                y='County',
-                orientation='h',
-                color='Affordable_Percent',
-                color_continuous_scale='RdYlGn',
-                title="Affordability Index by County (%<$35K)"
-            )
-            fig_affordability.update_layout(height=400)
-            st.plotly_chart(fig_affordability, use_container_width=True)
+        st.altair_chart(stacked_bar, use_container_width=True)
 
 
 def performance_page(filtered_df, display_df):
@@ -979,55 +879,21 @@ def performance_page(filtered_df, display_df):
     col1, col2 = st.columns(2)
 
     with col1:
-        # Range distribution by type
-        fig_range_dist = px.violin(
-            display_df,
-            y='Electric Range',
-            x='Electric Vehicle Type',
-            color='Electric Vehicle Type',
-            color_discrete_sequence=get_color_schemes()['types'],
-            title="Range Distribution by Vehicle Type",
-            box=True
-        )
-        fig_range_dist.update_layout(height=400, showlegend=False)
-        st.plotly_chart(fig_range_dist, use_container_width=True)
-
-    with col2:
-        # Range categories
-        if 'Range_Category' in filtered_df.columns:
-            range_cat_dist = filtered_df['Range_Category'].value_counts().reset_index()
-            range_cat_dist.columns = ['Category', 'Count']
-
-            fig_range_cat = px.pie(
-                range_cat_dist,
-                values='Count',
-                names='Category',
-                color_discrete_sequence=get_color_schemes()['performance'],
-                title="Range Category Distribution"
-            )
-            fig_range_cat.update_traces(textposition='inside', textinfo='percent+label')
-            fig_range_cat.update_layout(height=400)
-            st.plotly_chart(fig_range_cat, use_container_width=True)
-
-    # Performance trends
-    col1, col2 = st.columns(2)
-
-    with col1:
         # Range evolution over time
         range_trends = filtered_df.groupby(['Model Year', 'Electric Vehicle Type'])[
             'Electric Range'].mean().reset_index()
 
-        fig_range_trends = px.line(
-            range_trends,
-            x='Model Year',
-            y='Electric Range',
-            color='Electric Vehicle Type',
-            color_discrete_sequence=get_color_schemes()['categorical'],
-            title="Range Evolution by Vehicle Type",
-            markers=True
+        trend_chart = alt.Chart(range_trends).mark_line(point=True).encode(
+            x=alt.X('Model Year:O', title='Model Year'),
+            y=alt.Y('Electric Range:Q', title='Average Range (miles)'),
+            color=alt.Color('Electric Vehicle Type:N', scale=alt.Scale(scheme='category20')),
+            tooltip=['Model Year', 'Electric Vehicle Type', alt.Tooltip('Electric Range:Q', format='.1f')]
+        ).properties(
+            width=350,
+            height=400,
+            title="Range Evolution by Vehicle Type"
         )
-        fig_range_trends.update_layout(height=400)
-        st.plotly_chart(fig_range_trends, use_container_width=True)
+        st.altair_chart(trend_chart, use_container_width=True)
 
     with col2:
         # Top performers by make
@@ -1036,53 +902,293 @@ def performance_page(filtered_df, display_df):
         }).round(1)
         make_performance.columns = ['Avg_Range', 'Max_Range', 'Count']
         make_performance = make_performance[make_performance['Count'] >= 5].sort_values('Avg_Range',
-                                                                                        ascending=False).head(10)
+                                                                                        ascending=False).head(
+            10).reset_index()
 
-        fig_make_performance = px.scatter(
-            make_performance.reset_index(),
-            x='Avg_Range',
-            y='Max_Range',
-            size='Count',
-            color='Make',
-            color_discrete_sequence=get_color_schemes()['makes'],
-            title="Make Performance Matrix",
-            hover_data=['Count']
+        scatter_performance = alt.Chart(make_performance).mark_circle(size=100).encode(
+            x=alt.X('Avg_Range:Q', title='Average Range (miles)'),
+            y=alt.Y('Max_Range:Q', title='Maximum Range (miles)'),
+            size=alt.Size('Count:Q', scale=alt.Scale(range=[100, 400])),
+            color=alt.Color('Make:N', scale=alt.Scale(scheme='set3')),
+            tooltip=['Make', 'Avg_Range', 'Max_Range', 'Count']
+        ).properties(
+            width=350,
+            height=400,
+            title="Make Performance Matrix"
         )
-        fig_make_performance.update_layout(height=400)
-        st.plotly_chart(fig_make_performance, use_container_width=True)
+        st.altair_chart(scatter_performance, use_container_width=True)
 
-    # Advanced performance analysis
-    st.markdown("### Advanced Performance Insights")
+
+def distribution_page(filtered_df, display_df):
+    """Distribution analysis page"""
+    st.markdown('<h1 class="main-header">Distribution Analysis</h1>', unsafe_allow_html=True)
+
+    if display_df.empty:
+        st.warning("No data available with current filters.")
+        return
 
     col1, col2 = st.columns(2)
 
     with col1:
-        # Range improvement by model year
-        yearly_stats = filtered_df.groupby('Model Year')['Electric Range'].agg(['mean', 'median', 'std']).round(1)
-        yearly_stats = yearly_stats.reset_index()
-
-        fig_yearly_performance = px.line(
-            yearly_stats,
-            x='Model Year',
-            y=['mean', 'median'],
-            title="Yearly Range Statistics",
-            markers=True
+        # Histogram with overlaid curves
+        histogram = alt.Chart(display_df).mark_bar(opacity=0.7).encode(
+            x=alt.X('Electric Range:Q', bin=alt.Bin(maxbins=30), title='Electric Range (miles)'),
+            y=alt.Y('count()', title='Number of Vehicles'),
+            color=alt.Color('Electric Vehicle Type:N', scale=alt.Scale(scheme='dark2')),
+            tooltip=['count()']
+        ).properties(
+            width=350,
+            height=500,
+            title="Electric Range Distribution by Type"
         )
-        fig_yearly_performance.update_layout(height=400)
-        st.plotly_chart(fig_yearly_performance, use_container_width=True)
+        st.altair_chart(histogram, use_container_width=True)
 
     with col2:
-        # Performance leaders table
-        performance_leaders = filtered_df.nlargest(10, 'Electric Range')[
-            ['Make', 'Model', 'Model Year', 'Electric Range', 'Electric Vehicle Type']
-        ]
-
-        st.markdown("#### Top 10 Performance Leaders")
-        st.dataframe(
-            performance_leaders,
-            use_container_width=True,
-            hide_index=True
+        # Box plot analysis
+        box_plot = alt.Chart(display_df).mark_boxplot(size=50).encode(
+            x=alt.X('Electric Vehicle Type:N', title='Vehicle Type'),
+            y=alt.Y('Electric Range:Q', title='Electric Range (miles)'),
+            color=alt.Color('Electric Vehicle Type:N', scale=alt.Scale(scheme='dark2'))
+        ).properties(
+            width=350,
+            height=500,
+            title="Range Distribution by Vehicle Type"
         )
+        st.altair_chart(box_plot, use_container_width=True)
+
+    # Additional distribution metrics
+    st.markdown("### Statistical Summary")
+
+    stats_df = display_df.groupby('Electric Vehicle Type')['Electric Range'].agg([
+        'count', 'mean', 'median', 'std', 'min', 'max'
+    ]).round(2)
+
+    st.dataframe(stats_df, use_container_width=True)
+
+
+def pie_page(filtered_df, display_df):
+    """Pie chart and market share analysis"""
+    st.markdown('<h1 class="main-header">Market Share Analysis</h1>', unsafe_allow_html=True)
+
+    if filtered_df.empty:
+        st.warning("No data available with current filters.")
+        return
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Vehicle Type Market Share
+        type_counts = filtered_df['Electric Vehicle Type'].value_counts().reset_index()
+        type_counts.columns = ['Type', 'Count']
+
+        pie_type = alt.Chart(type_counts).mark_arc().encode(
+            theta=alt.Theta('Count:Q'),
+            color=alt.Color('Type:N', scale=alt.Scale(scheme='dark2')),
+            tooltip=['Type', 'Count']
+        ).properties(
+            width=350,
+            height=400,
+            title="Market Share by Vehicle Type"
+        )
+        st.altair_chart(pie_type, use_container_width=True)
+
+    with col2:
+        # Top Makes Market Share
+        make_counts = filtered_df['Make'].value_counts().head(8).reset_index()
+        make_counts.columns = ['Make', 'Count']
+
+        pie_make = alt.Chart(make_counts).mark_arc().encode(
+            theta=alt.Theta('Count:Q'),
+            color=alt.Color('Make:N', scale=alt.Scale(scheme='set3')),
+            tooltip=['Make', 'Count']
+        ).properties(
+            width=350,
+            height=400,
+            title="Top 8 Makes Market Share"
+        )
+        st.altair_chart(pie_make, use_container_width=True)
+
+
+def boxplot_page(filtered_df, display_df):
+    """Box plot analysis page"""
+    st.markdown('<h1 class="main-header">Box Plot Analysis</h1>', unsafe_allow_html=True)
+
+    if display_df.empty:
+        st.warning("No data available with current filters.")
+        return
+
+    # Main box plot
+    box_plot = alt.Chart(display_df).mark_boxplot().encode(
+        x=alt.X('Electric Vehicle Type:N', title='Vehicle Type'),
+        y=alt.Y('Electric Range:Q', title='Electric Range (miles)'),
+        color=alt.Color('Electric Vehicle Type:N', scale=alt.Scale(scheme='dark2'))
+    ).properties(
+        width=700,
+        height=500,
+        title="Electric Range Distribution by Vehicle Type"
+    )
+    st.altair_chart(box_plot, use_container_width=True)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Box plot by top makes
+        top_makes = filtered_df['Make'].value_counts().head(8).index
+        top_makes_df = display_df[display_df['Make'].isin(top_makes)]
+
+        box_makes = alt.Chart(top_makes_df).mark_boxplot().encode(
+            x=alt.X('Make:N', title='Make'),
+            y=alt.Y('Electric Range:Q', title='Electric Range (miles)'),
+            color=alt.Color('Make:N', scale=alt.Scale(scheme='set3'))
+        ).properties(
+            width=350,
+            height=400,
+            title="Range by Top Makes"
+        )
+        st.altair_chart(box_makes, use_container_width=True)
+
+    with col2:
+        # Violin plot alternative
+        violin_plot = alt.Chart(display_df).mark_area(
+            orient='horizontal',
+            opacity=0.7
+        ).transform_density(
+            'Electric Range',
+            as_=['Electric Range', 'density'],
+            groupby=['Electric Vehicle Type']
+        ).encode(
+            x=alt.X('density:Q', title='Density'),
+            y=alt.Y('Electric Range:Q', title='Electric Range (miles)'),
+            color=alt.Color('Electric Vehicle Type:N', scale=alt.Scale(scheme='dark2'))
+        ).properties(
+            width=350,
+            height=400,
+            title="Range Density by Type"
+        )
+        st.altair_chart(violin_plot, use_container_width=True)
+
+
+def heatmap_page(filtered_df, display_df):
+    """Heatmap analysis page"""
+    st.markdown('<h1 class="main-header">Heatmap Analysis</h1>', unsafe_allow_html=True)
+
+    if filtered_df.empty:
+        st.warning("No data available with current filters.")
+        return
+
+    # Create heatmap data
+    heatmap_data = filtered_df.groupby(['Make', 'Model Year']).size().reset_index(name='Count')
+
+    # Limit to top makes for readability
+    top_makes = filtered_df['Make'].value_counts().head(15).index
+    heatmap_data = heatmap_data[heatmap_data['Make'].isin(top_makes)]
+
+    heatmap = alt.Chart(heatmap_data).mark_rect().encode(
+        x=alt.X('Model Year:O', title='Model Year'),
+        y=alt.Y('Make:N', title='Make'),
+        color=alt.Color('Count:Q', scale=alt.Scale(scheme='viridis'), title='Vehicle Count'),
+        tooltip=['Make', 'Model Year', 'Count']
+    ).properties(
+        width=700,
+        height=600,
+        title="Vehicle Count Heatmap: Make vs Model Year"
+    )
+    st.altair_chart(heatmap, use_container_width=True)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Average range heatmap
+        avg_range_data = filtered_df.groupby(['Electric Vehicle Type', 'Model Year'])[
+            'Electric Range'].mean().reset_index()
+
+        range_heatmap = alt.Chart(avg_range_data).mark_rect().encode(
+            x=alt.X('Model Year:O', title='Model Year'),
+            y=alt.Y('Electric Vehicle Type:N', title='Vehicle Type'),
+            color=alt.Color('Electric Range:Q', scale=alt.Scale(scheme='plasma'), title='Avg Range'),
+            tooltip=['Electric Vehicle Type', 'Model Year', alt.Tooltip('Electric Range:Q', format='.1f')]
+        ).properties(
+            width=350,
+            height=400,
+            title="Average Range Heatmap"
+        )
+        st.altair_chart(range_heatmap, use_container_width=True)
+
+    with col2:
+        # Price heatmap (if available)
+        if 'Base MSRP' in filtered_df.columns:
+            price_data = filtered_df.groupby(['Electric Vehicle Type', 'Model Year'])['Base MSRP'].mean().reset_index()
+
+            price_heatmap = alt.Chart(price_data).mark_rect().encode(
+                x=alt.X('Model Year:O', title='Model Year'),
+                y=alt.Y('Electric Vehicle Type:N', title='Vehicle Type'),
+                color=alt.Color('Base MSRP:Q', scale=alt.Scale(scheme='blues'), title='Avg Price'),
+                tooltip=['Electric Vehicle Type', 'Model Year', alt.Tooltip('Base MSRP:Q', format='$,.0f')]
+            ).properties(
+                width=350,
+                height=400,
+                title="Average Price Heatmap"
+            )
+            st.altair_chart(price_heatmap, use_container_width=True)
+
+
+def trends_page(filtered_df, display_df):
+    """Trends analysis page"""
+    st.markdown('<h1 class="main-header">Trend Analysis</h1>', unsafe_allow_html=True)
+
+    if filtered_df.empty:
+        st.warning("No data available with current filters.")
+        return
+
+    # Average range trends over time
+    range_trends = filtered_df.groupby(['Model Year', 'Electric Vehicle Type'])['Electric Range'].mean().reset_index()
+
+    trend_chart = alt.Chart(range_trends).mark_line(point=True).encode(
+        x=alt.X('Model Year:O', title='Model Year'),
+        y=alt.Y('Electric Range:Q', title='Average Electric Range (miles)'),
+        color=alt.Color('Electric Vehicle Type:N', scale=alt.Scale(scheme='dark2')),
+        tooltip=['Model Year', 'Electric Vehicle Type', alt.Tooltip('Electric Range:Q', format='.1f')]
+    ).properties(
+        width=700,
+        height=500,
+        title="Average Electric Range Trends by Vehicle Type"
+    )
+    st.altair_chart(trend_chart, use_container_width=True)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Vehicle count trends
+        count_trends = filtered_df.groupby(['Model Year', 'Electric Vehicle Type']).size().reset_index(name='Count')
+
+        area_chart = alt.Chart(count_trends).mark_area().encode(
+            x=alt.X('Model Year:O', title='Model Year'),
+            y=alt.Y('Count:Q', title='Number of Vehicles'),
+            color=alt.Color('Electric Vehicle Type:N', scale=alt.Scale(scheme='category20')),
+            tooltip=['Model Year', 'Electric Vehicle Type', 'Count']
+        ).properties(
+            width=350,
+            height=400,
+            title="Vehicle Registration Trends"
+        )
+        st.altair_chart(area_chart, use_container_width=True)
+
+    with col2:
+        # Make diversity over time
+        make_diversity = filtered_df.groupby('Model Year')['Make'].nunique().reset_index()
+        make_diversity.columns = ['Model Year', 'Unique_Makes']
+
+        diversity_chart = alt.Chart(make_diversity).mark_bar().encode(
+            x=alt.X('Model Year:O', title='Model Year'),
+            y=alt.Y('Unique_Makes:Q', title='Number of Unique Makes'),
+            color=alt.Color('Unique_Makes:Q', scale=alt.Scale(scheme='viridis')),
+            tooltip=['Model Year', 'Unique_Makes']
+        ).properties(
+            width=350,
+            height=400,
+            title="Make Diversity Over Time"
+        )
+        st.altair_chart(diversity_chart, use_container_width=True)
 
 
 # Helper functions for calculations
@@ -1153,30 +1259,10 @@ def calculate_range_improvement(df):
     return ((last_year_avg - first_year_avg) / first_year_avg) * 100
 
 
-# Additional page stubs for the remaining navigation items
+# Stub pages for remaining navigation
 def leaders_page(filtered_df, display_df):
     st.markdown('<h1 class="main-header">Market Leaders Analysis</h1>', unsafe_allow_html=True)
     st.info("Market leaders analysis - detailed rankings and competitive insights")
-
-
-def policy_page(filtered_df, display_df):
-    st.markdown('<h1 class="main-header">Policy Impact Analysis</h1>', unsafe_allow_html=True)
-    st.info("CAFV eligibility and policy impact analysis")
-
-
-def models_page(filtered_df, display_df):
-    st.markdown('<h1 class="main-header">Model Deep Dive</h1>', unsafe_allow_html=True)
-    st.info("Individual model performance and comparison analysis")
-
-
-def utilities_page(filtered_df, display_df):
-    st.markdown('<h1 class="main-header">Utility Territory Analysis</h1>', unsafe_allow_html=True)
-    st.info("Electric utility correlation and infrastructure analysis")
-
-
-def advanced_page(filtered_df, display_df):
-    st.markdown('<h1 class="main-header">Advanced Analytics</h1>', unsafe_allow_html=True)
-    st.info("Multi-dimensional analysis and predictive insights")
 
 
 # Main Application
@@ -1206,14 +1292,16 @@ def main():
         performance_page(filtered_df, display_df)
     elif "Market Leaders" in selected_page:
         leaders_page(filtered_df, display_df)
-    elif "Policy Impact" in selected_page:
-        policy_page(filtered_df, display_df)
-    elif "Model Deep Dive" in selected_page:
-        models_page(filtered_df, display_df)
-    elif "Utility Analysis" in selected_page:
-        utilities_page(filtered_df, display_df)
-    elif "Advanced Analytics" in selected_page:
-        advanced_page(filtered_df, display_df)
+    elif "Distribution Analysis" in selected_page:
+        distribution_page(filtered_df, display_df)
+    elif "Market Share" in selected_page:
+        pie_page(filtered_df, display_df)
+    elif "Box Analysis" in selected_page:
+        boxplot_page(filtered_df, display_df)
+    elif "Heatmap Analysis" in selected_page:
+        heatmap_page(filtered_df, display_df)
+    elif "Trends Analysis" in selected_page:
+        trends_page(filtered_df, display_df)
 
 
 if __name__ == "__main__":
