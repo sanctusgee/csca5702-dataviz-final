@@ -3,9 +3,6 @@
 ### Data Source:
 [Washington State Electric Vehicle Population Data](https://data.wa.gov/Transportation/Electric-Vehicle-Population-Data/f6w7-q2d2/about_data)
 
-### My GitHub Repository
-**https://github.com/sanctusgee/csca5702-dataviz-final**
-
 This is an interactive data visualization platform for exploring Washington State's electric vehicle data, built with Streamlit and Altair for CSCA 5702 - Fundamentals of Data Visualization.
 
 ## Features
