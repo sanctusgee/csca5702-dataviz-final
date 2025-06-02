@@ -81,14 +81,7 @@ I went with **Streamlit and Altair** for several practical reasons: Streamlit el
 
 - **Data Size Management:** The platform directly addresses the course guideline recommending datasets "contain 5,000 or fewer datapoints" to prevent Altair from lagging. While the raw Washington State EV dataset has 150,000+ records, I built in intelligent sampling that automatically limits visualizations to 5,000 data points:
 
-```python
-# Sample Mode - Default enabled to meet course requirements
-use_sample = st.sidebar.checkbox("Sample Mode (5,000 points)", value=True, key="sample_mode")
-
-if use_sample and total_records > 5000:
-    display_df = filtered_df.sample(n=5000, random_state=42)
-    st.sidebar.warning(f"Showing 5,000 of {total_records:,} records")
-```
+![img.png](img.png)
 
 **Key Compliance Features:**
   
