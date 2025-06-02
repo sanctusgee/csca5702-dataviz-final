@@ -10,9 +10,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-# add page footer
+# add about page
 with st.expander("About"):
-    st.write("Created by Godwin Effiong | CSCA5702 Final Project")
+    st.markdown('Created by <strong>Godwin Effiong</strong> | CSCA5702 Final Project. <a href="https://github.com/sanctusgee/csca5702-dataviz-final" target="_blank"><<strong>Github Page</strong></a>', unsafe_allow_html=True)
 
 # I am using minimal CSS for my professional looking styling
 st.markdown("""
@@ -543,7 +543,6 @@ def home_page():
     st.markdown("""
     <div style='text-align: center; font-size: 1.3rem; color: #666; margin-bottom: 3rem;'>
         Submitted for final project CSCA 5702 - Fundamentals of Data Visualization<br>
-        <strong>GitHub:</strong> <a href="https://sanctusgee/csca5702-dataviz-final.git" target="_blank">CSCA5702-Final-Project</a>
     </div>
     """, unsafe_allow_html=True)
 
