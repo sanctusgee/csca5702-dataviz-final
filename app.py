@@ -12,7 +12,7 @@ st.set_page_config(
 )
 # add about page
 with st.expander("About"):
-    st.markdown('Created by <strong>Godwin Effiong</strong> | CSCA5702 Final Project. <a href="https://github.com/sanctusgee/csca5702-dataviz-final" target="_blank"><<strong>Github Page</strong></a>', unsafe_allow_html=True)
+    st.markdown('Created by <strong>Godwin Effiong</strong> | CSCA5702 Final Project. <a href="https://github.com/sanctusgee/csca5702-dataviz-final" target="_blank"><strong>Github Page</strong></a>', unsafe_allow_html=True)
 
 # I am using minimal CSS for my professional looking styling
 st.markdown("""
