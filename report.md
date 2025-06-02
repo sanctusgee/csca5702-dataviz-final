@@ -79,7 +79,7 @@ I went with **Streamlit and Altair** for several practical reasons: Streamlit el
 
 ### Course Requirement Compliance
 
-**Data Size Management:** The platform directly addresses the course guideline recommending datasets "contain 5,000 or fewer datapoints" to prevent Altair from lagging. While the raw Washington State EV dataset has 150,000+ records, I built in intelligent sampling that automatically limits visualizations to 5,000 data points:
+- **Data Size Management:** The platform directly addresses the course guideline recommending datasets "contain 5,000 or fewer datapoints" to prevent Altair from lagging. While the raw Washington State EV dataset has 150,000+ records, I built in intelligent sampling that automatically limits visualizations to 5,000 data points:
 
 ```python
 # Sample Mode - Default enabled to meet course requirements
@@ -91,10 +91,10 @@ if use_sample and total_records > 5000:
 ```
 
 **Key Compliance Features:**
-- **Default Sampling:** Sample mode is enabled by default (`value=True`), so course requirements are met automatically
-- **User Control:** Advanced users can toggle to the full dataset if they want, but the platform defaults to compliant behavior
-- **Transparent Communication:** Users always see exactly how many points they're looking at vs. what's available
-- **Statistical Integrity:** Random sampling with a fixed seed (`random_state=42`) preserves data distribution patterns while meeting size constraints
+  - **Default Sampling:** Sample mode is enabled by default (`value=True`), so course requirements are met automatically
+  - **User Control:** Advanced users can toggle to the full dataset if they want, but the platform defaults to compliant behavior
+  - **Transparent Communication:** Users always see exactly how many points they're looking at vs. what's available
+  - **Statistical Integrity:** Random sampling with a fixed seed (`random_state=42`) preserves data distribution patterns while meeting size constraints
 
 **Additional Requirement Fulfillment:**
 - **Tabular Format:** Uses CSV data format as recommended
@@ -117,15 +117,15 @@ This approach shows how you can make large-scale datasets work with course techn
 
 ### Interaction Design
 
-**Smart Filtering System:** The sidebar works as a control panel with real-time feedback. Multi-select dropdowns have quick "All/Clear" buttons for easy filter management, while sliders handle continuous variables (year, price, range). Live counters show how your selections affect things, and filtered result metrics give you immediate feedback.
+- **Smart Filtering System:** The sidebar works as a control panel with real-time feedback. Multi-select dropdowns have quick "All/Clear" buttons for easy filter management, while sliders handle continuous variables (year, price, range). Live counters show how your selections affect things, and filtered result metrics give you immediate feedback.
 
-**Cross-Filtering Interactivity:** On key pages like the Executive Dashboard, clicking any chart element filters all the other visualizations. This linked interaction supports exploratory analysis by showing relationships across data dimensions - click "King County" and you instantly see that county's price distribution, popular vehicle types, and market leaders.
+- **Cross-Filtering Interactivity:** On key pages like the Executive Dashboard, clicking any chart element filters all the other visualizations. This linked interaction supports exploratory analysis by showing relationships across data dimensions - click "King County" and you instantly see that county's price distribution, popular vehicle types, and market leaders.
 
 ### Visual Design Rationale
 
-**Professional Look:** Gradient backgrounds, hover animations, and consistent color schemes create the trustworthiness that's crucial for data-driven decision making. The design balances visual appeal with functional clarity.
+- **Professional Look:** Gradient backgrounds, hover animations, and consistent color schemes create the trustworthiness that's crucial for data-driven decision making. The design balances visual appeal with functional clarity.
 
-**Color Strategy:** I used carefully selected palettes ('category20', 'viridis', 'plasma') that are colorblind-friendly and make semantic sense. Blue gradients for geographic data, warm gradients for performance metrics, and distinct categorical colors for brand comparisons.
+- **Color Strategy:** I used carefully selected palettes ('category20', 'viridis', 'plasma') that are colorblind-friendly and make semantic sense. Blue gradients for geographic data, warm gradients for performance metrics, and distinct categorical colors for brand comparisons.
 
 ---
 
@@ -133,9 +133,9 @@ This approach shows how you can make large-scale datasets work with course techn
 
 ### Methodology
 
-**Participants:** 5 evaluators (2 family members with business analytics backgrounds + 3 tech industry colleagues)
+- **Participants:** 5 evaluators (2 family members with business analytics backgrounds + 3 tech industry colleagues)
 
-**Procedure:** Each person spent 30 minutes exploring the platform on their own, then we had structured conversations covering navigation accuracy, insight discovery, and how useful they found it.
+- **Procedure:** Each person spent 30 minutes exploring the platform on their own, then we had structured conversations covering navigation accuracy, insight discovery, and how useful they found it.
 
 **Evaluation Metrics:**
 - **Insight Discovery:** Number of actionable insights identified per session
@@ -143,7 +143,7 @@ This approach shows how you can make large-scale datasets work with course techn
 - **Usefulness Rating:** 1-5 scale assessment of practical value
 - **Interaction Engagement:** How often and effectively they used filtering and cross-filtering features
 
-**Success Criteria:** ≥3 insights per session, ≥80% navigation accuracy, usefulness rating ≥4/5
+**Success Criteria:** >=3 insights per session, >=80% navigation accuracy, usefulness rating >=4/5
 
 ### Results and Findings
 
@@ -166,23 +166,23 @@ This approach shows how you can make large-scale datasets work with course techn
 
 ### What Worked Really Well
 
-**Phased Development Approach:** Building pages one at a time let me refine things iteratively and avoid overwhelming complexity. Starting with core functionality before adding interactions was essential for managing project scope.
+- **Phased Development Approach:** Building pages one at a time let me refine things iteratively and avoid overwhelming complexity. Starting with core functionality before adding interactions was essential for managing project scope.
 
-**Technology Alignment:** Streamlit's Python-centric approach matched my technical strengths while delivering professional results. The framework's built-in responsiveness and easy deployment let me focus on visualization design rather than infrastructure headaches.
+- **Technology Alignment:** Streamlit's Python-centric approach matched my technical strengths while delivering professional results. The framework's built-in responsiveness and easy deployment let me focus on visualization design rather than infrastructure headaches.
 
-**Multi-Modal Analysis:** Providing eleven different analytical views accommodated different user preferences and thinking styles. Some people preferred statistical distributions (box plots, histograms), others gravitated toward geographic or temporal patterns, and executives liked high-level KPI dashboards.
+- **Multi-Modal Analysis:** Providing eleven different analytical views accommodated different user preferences and thinking styles. Some people preferred statistical distributions (box plots, histograms), others gravitated toward geographic or temporal patterns, and executives liked high-level KPI dashboards.
 
-**Interactive Cross-Filtering:** Where I implemented this feature, it transformed static charts into dynamic exploration tools. Users naturally discovered insights by clicking and filtering, creating an engaging analytical experience.
+- **Interactive Cross-Filtering:** Where I implemented this feature, it transformed static charts into dynamic exploration tools. Users naturally discovered insights by clicking and filtering, creating an engaging analytical experience.
 
 ### Areas for Future Refinement
 
-**Interaction Consistency:** The biggest limitation is inconsistent cross-filtering implementation across all pages. While the Executive Dashboard and several other pages have full interactivity, some visualizations are still static. Future versions should standardize interactive behavior throughout the platform.
+- **Interaction Consistency:** The biggest limitation is inconsistent cross-filtering implementation across all pages. While the Executive Dashboard and several other pages have full interactivity, some visualizations are still static. Future versions should standardize interactive behavior throughout the platform.
 
-**Advanced Analytics:** The current platform focuses on descriptive analytics. Adding predictive modeling (trend forecasting, market segment prediction) and prescriptive features (recommendation engines) would increase decision-making value.
+- **Advanced Analytics:** The current platform focuses on descriptive analytics. Adding predictive modeling (trend forecasting, market segment prediction) and prescriptive features (recommendation engines) would increase decision-making value.
 
-**Geographic Enhancement:** While county-level analysis provides useful insights, integrating actual mapping visualizations would strengthen geographic analysis capabilities and improve spatial pattern recognition.
+- **Geographic Enhancement:** While county-level analysis provides useful insights, integrating actual mapping visualizations would strengthen geographic analysis capabilities and improve spatial pattern recognition.
 
-**Real-Time Data Integration:** Right now I'm using static dataset snapshots. Implementing live data feeds would transform the platform into an ongoing market monitoring tool rather than just historical analysis.
+- **Real-Time Data Integration:** Right now I'm using static dataset snapshots. Implementing live data feeds would transform the platform into an ongoing market monitoring tool rather than just historical analysis.
 
 ### Key Learnings
 
@@ -191,5 +191,6 @@ This project showed me how thoughtful technology selection and user-centered des
 The course requirement compliance approach was particularly valuable, showing how technical constraints can drive innovative solutions. By implementing intelligent sampling as the default behavior, the platform maintains excellent performance while preserving analytical integrity - it's a good example of how limitations often lead to better overall user experiences.
 
 ---
+**Godwin Effiong**
 
 **Course:** CSCA 5702 - Fundamentals of Data Visualization
