@@ -1,10 +1,14 @@
 # Washington State EV Analytics Platform
 
-An interactive data visualization platform for exploring Washington State's electric vehicle population data, built with Streamlit and Altair for CSCA 5702 - Fundamentals of Data Visualization.
+### Data Source:
+[Washington State Electric Vehicle Population Data](https://data.wa.gov/Transportation/Electric-Vehicle-Population-Data/f6w7-q2d2/about_data)
 
-## Live Demo
+### My GitHub Repository
+**https://github.com/sanctusgee/csca5702-dataviz-final**
 
-**[View Live Application](https://csca5702-final-project.streamlit.app/)**
+
+This is an interactive data visualization platform for exploring Washington State's electric vehicle population data, built with Streamlit and Altair for CSCA 5702 - Fundamentals of Data Visualization.
+
 
 ## Features
 
@@ -56,6 +60,8 @@ An interactive data visualization platform for exploring Washington State's elec
 streamlit run app.py
 ```
 4. **Open your browser** to http://localhost:8501
+
+You can also deploy this application on platforms like Streamlit Cloud, the live version is available at: [CSCA 5702 Final Project](https://csca5702-final-project.streamlit.app/)
 
 ### Usage
 

@@ -2,4 +2,7 @@ __pycache__/
 *.pyc
 .env
 .idea/
-
+.devcontainer/
+.DS_Store
+# Local configuration files
+setup_project_structure.py
