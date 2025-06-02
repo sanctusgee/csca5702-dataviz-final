@@ -699,8 +699,7 @@ def home_page():
     # Footer
     st.markdown("""
     <div class="footer-text">
-    This interactive EV analytics platform was created by **Godwin Effiong** as a final project for CSCA5702 - Fundamentals of Data Visualization at the University of Colorado Boulder.
-       <br>**Data source**: Washington State Department of Licensing <a href="https://data.wa.gov/Transportation/Electric-Vehicle-Population-Data/f6w7-q2d2/about_data" target="_blank">Electric Vehicle Population Data</a><br>
+       <br><strong>Data source</strong>: Washington State Department of Licensing <a href="https://data.wa.gov/Transportation/Electric-Vehicle-Population-Data/f6w7-q2d2/about_data" target="_blank">Electric Vehicle Population Data</a><br>
        </div>
     """, unsafe_allow_html=True)
 
