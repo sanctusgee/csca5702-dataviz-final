@@ -91,14 +91,21 @@ if use_sample and total_records > 5000:
 ```
 
 **Key Compliance Features:**
+  
   - **Default Sampling:** Sample mode is enabled by default (`value=True`), so course requirements are met automatically
+
   - **User Control:** Advanced users can toggle to the full dataset if they want, but the platform defaults to compliant behavior
+
   - **Transparent Communication:** Users always see exactly how many points they're looking at vs. what's available
+
   - **Statistical Integrity:** Random sampling with a fixed seed (`random_state=42`) preserves data distribution patterns while meeting size constraints
 
 **Additional Requirement Fulfillment:**
+ 
 - **Tabular Format:** Uses CSV data format as recommended
+
 - **Public Data:** Washington State government data is completely public and fine for course discussion
+
 - **Performance Optimization:** The 5,000-point limit eliminates Altair lag issues, creating smooth interactive experiences
 
 This approach shows how you can make large-scale datasets work with course technical requirements while keeping the analytical value and user experience quality intact.
@@ -138,9 +145,13 @@ This approach shows how you can make large-scale datasets work with course techn
 - **Procedure:** Each person spent 30 minutes exploring the platform on their own, then we had structured conversations covering navigation accuracy, insight discovery, and how useful they found it.
 
 **Evaluation Metrics:**
+
 - **Insight Discovery:** Number of actionable insights identified per session
+
 - **Navigation Accuracy:** Success rate finding relevant information without help  
+
 - **Usefulness Rating:** 1-5 scale assessment of practical value
+
 - **Interaction Engagement:** How often and effectively they used filtering and cross-filtering features
 
 **Success Criteria:** >=3 insights per session, >=80% navigation accuracy, usefulness rating >=4/5
@@ -148,16 +159,25 @@ This approach shows how you can make large-scale datasets work with course techn
 ### Results and Findings
 
 **Quantitative Results:**
+ 
 - **Insight Discovery:** Everyone exceeded the 3-insight threshold, averaging 5-7 actionable insights about EV market trends, competitive positioning, and geographic patterns
+
 - **Navigation Accuracy:** Consistently above 85% success rate for finding specific information
+
 - **Usefulness Rating:** Averaged 4.3/5, with particular praise for cross-filtering capabilities and professional presentation
+
 - **Interaction Engagement:** 100% of participants naturally discovered and actively used the cross-filtering features
 
 **Qualitative Feedback:**
+ 
 - Navigation felt intuitive and logically organized
+
 - Interactive cross-filtering was immediately understood and appreciated
+
 - Visual design conveyed professionalism and trustworthiness
+
 - Information architecture made sense for different analysis goals
+
 - Loading performance was satisfactory even with the large dataset
 
 ---
@@ -191,6 +211,7 @@ This project showed me how thoughtful technology selection and user-centered des
 The course requirement compliance approach was particularly valuable, showing how technical constraints can drive innovative solutions. By implementing intelligent sampling as the default behavior, the platform maintains excellent performance while preserving analytical integrity - it's a good example of how limitations often lead to better overall user experiences.
 
 ---
+
 **Godwin Effiong**
 
 **Course:** CSCA 5702 - Fundamentals of Data Visualization
