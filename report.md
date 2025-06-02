@@ -156,7 +156,7 @@ This approach shows how you can make large-scale datasets work with course techn
 
 **Success Criteria:** >=3 insights per session, >=80% navigation accuracy, usefulness rating >=4/5
 
-### Results and Findings
+## Results and Findings
 
 **Quantitative Results:**
  
@@ -214,4 +214,4 @@ The course requirement compliance approach was particularly valuable, showing ho
 
 **Godwin Effiong**
 
-**Course:** CSCA 5702 - Fundamentals of Data Visualization
+**Course:** CSCA5702 - Fundamentals of Data Visualization
