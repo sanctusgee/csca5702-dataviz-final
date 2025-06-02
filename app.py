@@ -12,7 +12,13 @@ st.set_page_config(
 )
 # add about page
 with st.expander("About"):
-    st.markdown('Created by <strong>Godwin Effiong</strong> | CSCA5702 Final Project. <a href="https://github.com/sanctusgee/csca5702-dataviz-final" target="_blank"><strong>Github Page</strong></a>', unsafe_allow_html=True)
+    st.markdown('''
+    Created by <strong>Godwin Effiong</strong> | CSCA5702 Final Project. 
+    <a href="https://github.com/sanctusgee/csca5702-dataviz-final" target="_blank"><strong>Github Page</strong></a>
+    <br><br>
+    <strong>Data source</strong>: Washington State Department of Licensing 
+    <a href="https://data.wa.gov/Transportation/Electric-Vehicle-Population-Data/f6w7-q2d2/about_data" target="_blank">Electric Vehicle Population Data</a>
+    ''', unsafe_allow_html=True)
 
 # I am using minimal CSS for my professional looking styling
 st.markdown("""
@@ -697,10 +703,12 @@ def home_page():
             st.rerun()
 
     # Footer
+    st.markdown("---")
     st.markdown("""
-    <div class="footer-text">
-       <br><strong>Data source</strong>: Washington State Department of Licensing <a href="https://data.wa.gov/Transportation/Electric-Vehicle-Population-Data/f6w7-q2d2/about_data" target="_blank">Electric Vehicle Population Data</a><br>
-       </div>
+    <div style="text-align: center; color: #666; font-size: 12px; margin-top: 2rem;">
+        <p>© 2025 Godwin Effiong | CSCA5702 Final Project - University of Colorado Boulder</p>
+        <p><em>Built with Streamlit & Altair</em></p>
+    </div>
     """, unsafe_allow_html=True)
 
 def overview_page(filtered_df, display_df):
