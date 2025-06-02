@@ -6,32 +6,30 @@
 ### My GitHub Repository
 **https://github.com/sanctusgee/csca5702-dataviz-final**
 
-
-This is an interactive data visualization platform for exploring Washington State's electric vehicle population data, built with Streamlit and Altair for CSCA 5702 - Fundamentals of Data Visualization.
-
+This is an interactive data visualization platform for exploring Washington State's electric vehicle data, built with Streamlit and Altair for CSCA 5702 - Fundamentals of Data Visualization.
 
 ## Features
 
 ### Interactive Analytics Dashboard
-- **11 Specialized Analysis Pages** covering market trends, pricing, geographic distribution, and performance metrics
-- **Advanced Filtering System** with real-time updates across year ranges, price brackets, vehicle makes, types, and counties
-- **Cross-Chart Interactivity** - click on any chart element to filter all related visualizations
-- **UI/UX with gradient styling**, hover effects, and modern design patterns
+- **11 Different Analysis Pages** covering market trends, pricing, maps, and performance
+- **Smart Filtering** with live updates for years, prices, car brands, types, and locations
+- **Click-to-Filter Charts** - click anywhere on a chart to filter everything else
+- **Modern Design** with gradients, animations, and clean styling
 
 ### Key Visualizations
-- Executive Dashboard with comprehensive KPIs and cross-filtering
-- Price Analytics with cost trends and efficiency analysis
-- Geographic Insights showing location-based adoption patterns
-- Market Leaders analysis with brand competition rankings
-- Performance Analytics tracking range and technology evolution
-- Statistical distributions, market share breakdowns, and correlation heatmaps
+- Executive Dashboard with key metrics and interactive filtering
+- Price Analytics showing cost trends and efficiency
+- Geographic Insights with location-based patterns
+- Market Leaders showing brand competition
+- Performance Analytics tracking range and technology changes
+- Statistical charts, market shares, and correlation heatmaps
 
 ## Technologies Used
 
-- **Streamlit** - Web application framework
-- **Altair** - Statistical visualization library
-- **Pandas** - Data manipulation and analysis
-- **NumPy** - Numerical computing
+- **Streamlit** - Web app framework (makes it easy to build data apps)
+- **Altair** - Chart library (creates beautiful interactive visualizations)
+- **Pandas** - Data handling (reads and processes the CSV data)
+- **NumPy** - Math operations
 
 ## Project Structure
 ![img.png](images/proj_structure.png)
@@ -40,7 +38,7 @@ This is an interactive data visualization platform for exploring Washington Stat
 
 ### Prerequisites
 - Python 3.8 or higher
-- pip package manager
+- pip (comes with Python)
 
 ### Installation
 
@@ -55,43 +53,41 @@ This is an interactive data visualization platform for exploring Washington Stat
 ``` 
 
 3. **Run the application**
-
 ```bash
 streamlit run app.py
 ```
 4. **Open your browser** to http://localhost:8501
 
-You can also deploy this application on platforms like Streamlit Cloud, the live version is available at: [CSCA 5702 Final Project](https://csca5702-final-project.streamlit.app/)
+You can also check out the live version at: [CSCA 5702 Final Project](https://csca5702-final-project.streamlit.app/)
 
 ### Usage
 
 **Navigation**
-Use the sidebar dropdown to navigate between different analysis pages:
+Use the dropdown menu in the sidebar to switch between pages:
 
-- **Home**: Overview and key metrics
-- **Executive Dashboard**: Comprehensive KPIs with interactive cross-filtering
-- **Price Analytics**: Cost trends and efficiency analysis
-- **Geographic Insights**: Location-based adoption patterns
-- **Market Leaders**: Brand competition and rankings
+- **Home**: Overview and main stats
+- **Executive Dashboard**: Key metrics with click-to-filter charts
+- **Price Analytics**: Cost trends and value analysis
+- **Geographic Insights**: Where EVs are popular
+- **Market Leaders**: Top brands and competition
 
 **Interactive Features**
 
-- Click on chart elements to filter all related visualizations
-- Use sidebar filters to narrow down data by year, price, make, type, or county
-- Brush-select areas in scatter plots for detailed segment analysis
-- Reset buttons available to clear all selections
+- Click on any chart to filter all the others
+- Use sidebar controls to narrow down by year, price, brand, type, or location
+- Select areas in scatter plots to zoom into specific segments
+- Hit reset buttons to clear your filters
 
 **Sample Mode**
-For optimal performance, the platform uses intelligent sampling (5,000 data points) while preserving analytical accuracy. Toggle this in the sidebar display options.
+The app automatically shows 5,000 data points for smooth performance while keeping the insights accurate. You can toggle this in the sidebar if needed.
 
 ---
 ### Project Highlights
 
 **Data Source**
-This project uses the official [Washington State Electric Vehicle Population Data ](https://data.wa.gov/Transportation/Electric-Vehicle-Population-Data/f6w7-q2d2/about_data)from the Department of Licensing:
-- Contains: 150,000+ records of Battery Electric Vehicles (BEVs) and Plug-in Hybrid Electric Vehicles (PHEVs)
-- Attributes: Make, model, electric range, pricing, geographic distribution, registration dates
-
+This project uses official data from [Washington State's Department of Licensing](https://data.wa.gov/Transportation/Electric-Vehicle-Population-Data/f6w7-q2d2/about_data):
+- **What's included**: 150,000+ records of electric and hybrid vehicles
+- **Data points**: Car make/model, electric range, prices, locations, registration dates
 
 **Course Information**
 
@@ -100,8 +96,8 @@ This project uses the official [Washington State Electric Vehicle Population Dat
 
 **License**
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project uses the MIT License - see the LICENSE file for details.
 
 **Contributing**
 
-This is an academic project, but feedback and suggestions are welcome! Please feel free to open an issue or submit a pull request.
+This is a school project, but I'd love feedback! Feel free to open an issue or suggest improvements.
