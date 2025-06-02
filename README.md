@@ -7,6 +7,7 @@ This is an interactive data visualization platform for exploring Washington Stat
 
 ## Features
 
+
 ### Interactive Analytics Dashboard
 - **11 Different Analysis Pages** covering market trends, pricing, maps, and performance
 - **Smart Filtering** with live updates for years, prices, car brands, types, and locations
